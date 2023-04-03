@@ -757,6 +757,11 @@ JS::Result<mozilla::Ok> Backend::register_dynamic_backend(JSContext *cx, JS::Han
     backend_config.use_ssl.val = useSslSlot.toBoolean();
   }
 
+  auto dontPoolSlot = JS::GetReservedSlot(backend, Backend::Slots::DontPool);
+  if ((backend_config.use_ssl.is_some = !dontPoolSlot.isNullOrUndefined())) {
+    backend_config.use_ssl.val = dontPoolSlot.toBoolean();
+  }
+
   auto tlsMinVersion = JS::GetReservedSlot(backend, Backend::Slots::TlsMinVersion);
   if ((backend_config.ssl_min_version.is_some = !tlsMinVersion.isNullOrUndefined())) {
     backend_config.ssl_min_version.val = (int8_t)tlsMinVersion.toInt32();
@@ -1002,6 +1007,8 @@ JSObject *Backend::create(JSContext *cx, JS::HandleObject request) {
   auto use_ssl = origin.rfind("https://", 0) == 0;
   JS::SetReservedSlot(backend, Backend::Slots::UseSsl, JS::BooleanValue(use_ssl));
 
+  JS::SetReservedSlot(backend, Backend::Slots::DontPool, JS::BooleanValue(false));
+
   auto result = Backend::register_dynamic_backend(cx, backend);
   if (result.isErr()) {
     return nullptr;
@@ -1219,6 +1226,18 @@ bool Backend::constructor(JSContext *cx, unsigned argc, JS::Value *vp) {
     }
     auto value = JS::ToBoolean(useSsl_val);
     JS::SetReservedSlot(backend, Backend::Slots::UseSsl, JS::BooleanValue(value));
+  }
+
+  JS::RootedValue dontPool_val(cx);
+  if (!JS_HasProperty(cx, configuration, "dontPool", &found)) {
+    return false;
+  }
+  if (found) {
+    if (!JS_GetProperty(cx, configuration, "dontPool", &dontPool_val)) {
+      return false;
+    }
+    auto value = JS::ToBoolean(dontPool_val);
+    JS::SetReservedSlot(backend, Backend::Slots::DontPool, JS::BooleanValue(value));
   }
 
   JS::RootedValue caCertificate_val(cx);
