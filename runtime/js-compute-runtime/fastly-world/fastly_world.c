@@ -220,6 +220,38 @@ typedef struct {
 typedef struct {
   bool is_err;
   union {
+    fastly_backend_health_t ok;
+    fastly_error_t err;
+  } val;
+} fastly_result_backend_health_error_t;
+
+typedef struct {
+  bool is_err;
+  union {
+    uint16_t ok;
+    fastly_error_t err;
+  } val;
+} fastly_result_u16_error_t;
+
+typedef struct {
+  bool is_err;
+  union {
+    fastly_timeout_ms_t ok;
+    fastly_error_t err;
+  } val;
+} fastly_result_timeout_ms_error_t;
+
+typedef struct {
+  bool is_err;
+  union {
+    fastly_tls_version_t ok;
+    fastly_error_t err;
+  } val;
+} fastly_result_tls_version_error_t;
+
+typedef struct {
+  bool is_err;
+  union {
   } val;
 } js_compute_runtime_result_void_void_t;
 
@@ -444,6 +476,42 @@ void __wasm_import_fastly_async_io_is_ready(int32_t, int32_t);
 
 __attribute__((import_module("fastly"), import_name("purge-surrogate-key")))
 void __wasm_import_fastly_purge_surrogate_key(int32_t, int32_t, int32_t, int32_t);
+
+__attribute__((import_module("fastly"), import_name("backend-exists")))
+void __wasm_import_fastly_backend_exists(int32_t, int32_t, int32_t);
+
+__attribute__((import_module("fastly"), import_name("backend-is-healthy")))
+void __wasm_import_fastly_backend_is_healthy(int32_t, int32_t, int32_t);
+
+__attribute__((import_module("fastly"), import_name("backend-is-dynamic")))
+void __wasm_import_fastly_backend_is_dynamic(int32_t, int32_t, int32_t);
+
+__attribute__((import_module("fastly"), import_name("backend-get-host")))
+void __wasm_import_fastly_backend_get_host(int32_t, int32_t, int32_t);
+
+__attribute__((import_module("fastly"), import_name("backend-get-override-host")))
+void __wasm_import_fastly_backend_get_override_host(int32_t, int32_t, int32_t);
+
+__attribute__((import_module("fastly"), import_name("backend-get-port")))
+void __wasm_import_fastly_backend_get_port(int32_t, int32_t, int32_t);
+
+__attribute__((import_module("fastly"), import_name("backend-get-connect-timeout-ms")))
+void __wasm_import_fastly_backend_get_connect_timeout_ms(int32_t, int32_t, int32_t);
+
+__attribute__((import_module("fastly"), import_name("backend-get-first-byte-timeout-ms")))
+void __wasm_import_fastly_backend_get_first_byte_timeout_ms(int32_t, int32_t, int32_t);
+
+__attribute__((import_module("fastly"), import_name("backend-get-between-bytes-timeout-ms")))
+void __wasm_import_fastly_backend_get_between_bytes_timeout_ms(int32_t, int32_t, int32_t);
+
+__attribute__((import_module("fastly"), import_name("backend-is-ssl")))
+void __wasm_import_fastly_backend_is_ssl(int32_t, int32_t, int32_t);
+
+__attribute__((import_module("fastly"), import_name("backend-get-ssl-min-version")))
+void __wasm_import_fastly_backend_get_ssl_min_version(int32_t, int32_t, int32_t);
+
+__attribute__((import_module("fastly"), import_name("backend-get-ssl-max-version")))
+void __wasm_import_fastly_backend_get_ssl_max_version(int32_t, int32_t, int32_t);
 
 __attribute__((weak, export_name("cabi_realloc")))
 void *cabi_realloc(void *ptr, size_t old_size, size_t align, size_t new_size) {
@@ -1738,7 +1806,7 @@ bool fastly_http_req_framing_headers_mode_set(fastly_request_handle_t h, fastly_
 
 bool fastly_http_req_register_dynamic_backend(fastly_world_string_t *prefix, fastly_world_string_t *target, fastly_dynamic_backend_config_t *config, fastly_error_t *err) {
   __attribute__((aligned(4)))
-  uint8_t ret_area[108];
+  uint8_t ret_area[112];
   int32_t ptr = (int32_t) &ret_area;
   *((int32_t*)(ptr + 4)) = (int32_t) (*prefix).len;
   *((int32_t*)(ptr + 0)) = (int32_t) (*prefix).ptr;
@@ -1826,17 +1894,24 @@ bool fastly_http_req_register_dynamic_backend(fastly_world_string_t *prefix, fas
   } else {
     *((int8_t*)(ptr + 96)) = 0;
   }
-  int32_t ptr21 = (int32_t) &ret_area;
-  __wasm_import_fastly_http_req_register_dynamic_backend(ptr, ptr21);
+  if (((*config).dont_pool).is_some) {
+    const bool *payload22 = &((*config).dont_pool).val;
+    *((int8_t*)(ptr + 108)) = 1;
+    *((int8_t*)(ptr + 109)) = *payload22;
+  } else {
+    *((int8_t*)(ptr + 108)) = 0;
+  }
+  int32_t ptr23 = (int32_t) &ret_area;
+  __wasm_import_fastly_http_req_register_dynamic_backend(ptr, ptr23);
   fastly_result_void_error_t result;
-  switch ((int32_t) (*((uint8_t*) (ptr21 + 0)))) {
+  switch ((int32_t) (*((uint8_t*) (ptr23 + 0)))) {
     case 0: {
       result.is_err = false;
       break;
     }
     case 1: {
       result.is_err = true;
-      result.val.err = (int32_t) (*((uint8_t*) (ptr21 + 1)));
+      result.val.err = (int32_t) (*((uint8_t*) (ptr23 + 1)));
       break;
     }
   }
@@ -2678,6 +2753,330 @@ bool fastly_purge_surrogate_key(fastly_world_string_t *surrogate_key, bool soft_
     case 1: {
       result.is_err = true;
       result.val.err = (int32_t) (*((uint8_t*) (ptr + 4)));
+      break;
+    }
+  }
+  if (!result.is_err) {
+    *ret = result.val.ok;
+    return 1;
+  } else {
+    *err = result.val.err;
+    return 0;
+  }
+}
+
+bool fastly_backend_exists(fastly_world_string_t *backend, bool *ret, fastly_error_t *err) {
+  __attribute__((aligned(1)))
+  uint8_t ret_area[2];
+  int32_t ptr = (int32_t) &ret_area;
+  __wasm_import_fastly_backend_exists((int32_t) (*backend).ptr, (int32_t) (*backend).len, ptr);
+  fastly_result_bool_error_t result;
+  switch ((int32_t) (*((uint8_t*) (ptr + 0)))) {
+    case 0: {
+      result.is_err = false;
+      result.val.ok = (int32_t) (*((uint8_t*) (ptr + 1)));
+      break;
+    }
+    case 1: {
+      result.is_err = true;
+      result.val.err = (int32_t) (*((uint8_t*) (ptr + 1)));
+      break;
+    }
+  }
+  if (!result.is_err) {
+    *ret = result.val.ok;
+    return 1;
+  } else {
+    *err = result.val.err;
+    return 0;
+  }
+}
+
+bool fastly_backend_is_healthy(fastly_world_string_t *backend, fastly_backend_health_t *ret, fastly_error_t *err) {
+  __attribute__((aligned(1)))
+  uint8_t ret_area[2];
+  int32_t ptr = (int32_t) &ret_area;
+  __wasm_import_fastly_backend_is_healthy((int32_t) (*backend).ptr, (int32_t) (*backend).len, ptr);
+  fastly_result_backend_health_error_t result;
+  switch ((int32_t) (*((uint8_t*) (ptr + 0)))) {
+    case 0: {
+      result.is_err = false;
+      result.val.ok = (int32_t) (*((uint8_t*) (ptr + 1)));
+      break;
+    }
+    case 1: {
+      result.is_err = true;
+      result.val.err = (int32_t) (*((uint8_t*) (ptr + 1)));
+      break;
+    }
+  }
+  if (!result.is_err) {
+    *ret = result.val.ok;
+    return 1;
+  } else {
+    *err = result.val.err;
+    return 0;
+  }
+}
+
+bool fastly_backend_is_dynamic(fastly_world_string_t *backend, bool *ret, fastly_error_t *err) {
+  __attribute__((aligned(1)))
+  uint8_t ret_area[2];
+  int32_t ptr = (int32_t) &ret_area;
+  __wasm_import_fastly_backend_is_dynamic((int32_t) (*backend).ptr, (int32_t) (*backend).len, ptr);
+  fastly_result_bool_error_t result;
+  switch ((int32_t) (*((uint8_t*) (ptr + 0)))) {
+    case 0: {
+      result.is_err = false;
+      result.val.ok = (int32_t) (*((uint8_t*) (ptr + 1)));
+      break;
+    }
+    case 1: {
+      result.is_err = true;
+      result.val.err = (int32_t) (*((uint8_t*) (ptr + 1)));
+      break;
+    }
+  }
+  if (!result.is_err) {
+    *ret = result.val.ok;
+    return 1;
+  } else {
+    *err = result.val.err;
+    return 0;
+  }
+}
+
+bool fastly_backend_get_host(fastly_world_string_t *backend, fastly_world_string_t *ret, fastly_error_t *err) {
+  __attribute__((aligned(4)))
+  uint8_t ret_area[12];
+  int32_t ptr = (int32_t) &ret_area;
+  __wasm_import_fastly_backend_get_host((int32_t) (*backend).ptr, (int32_t) (*backend).len, ptr);
+  fastly_result_string_error_t result;
+  switch ((int32_t) (*((uint8_t*) (ptr + 0)))) {
+    case 0: {
+      result.is_err = false;
+      result.val.ok = (fastly_world_string_t) { (char*)(*((int32_t*) (ptr + 4))), (size_t)(*((int32_t*) (ptr + 8))) };
+      break;
+    }
+    case 1: {
+      result.is_err = true;
+      result.val.err = (int32_t) (*((uint8_t*) (ptr + 4)));
+      break;
+    }
+  }
+  if (!result.is_err) {
+    *ret = result.val.ok;
+    return 1;
+  } else {
+    *err = result.val.err;
+    return 0;
+  }
+}
+
+bool fastly_backend_get_override_host(fastly_world_string_t *backend, fastly_world_string_t *ret, fastly_error_t *err) {
+  __attribute__((aligned(4)))
+  uint8_t ret_area[12];
+  int32_t ptr = (int32_t) &ret_area;
+  __wasm_import_fastly_backend_get_override_host((int32_t) (*backend).ptr, (int32_t) (*backend).len, ptr);
+  fastly_result_string_error_t result;
+  switch ((int32_t) (*((uint8_t*) (ptr + 0)))) {
+    case 0: {
+      result.is_err = false;
+      result.val.ok = (fastly_world_string_t) { (char*)(*((int32_t*) (ptr + 4))), (size_t)(*((int32_t*) (ptr + 8))) };
+      break;
+    }
+    case 1: {
+      result.is_err = true;
+      result.val.err = (int32_t) (*((uint8_t*) (ptr + 4)));
+      break;
+    }
+  }
+  if (!result.is_err) {
+    *ret = result.val.ok;
+    return 1;
+  } else {
+    *err = result.val.err;
+    return 0;
+  }
+}
+
+bool fastly_backend_get_port(fastly_world_string_t *backend, uint16_t *ret, fastly_error_t *err) {
+  __attribute__((aligned(2)))
+  uint8_t ret_area[4];
+  int32_t ptr = (int32_t) &ret_area;
+  __wasm_import_fastly_backend_get_port((int32_t) (*backend).ptr, (int32_t) (*backend).len, ptr);
+  fastly_result_u16_error_t result;
+  switch ((int32_t) (*((uint8_t*) (ptr + 0)))) {
+    case 0: {
+      result.is_err = false;
+      result.val.ok = (uint16_t) ((int32_t) (*((uint16_t*) (ptr + 2))));
+      break;
+    }
+    case 1: {
+      result.is_err = true;
+      result.val.err = (int32_t) (*((uint8_t*) (ptr + 2)));
+      break;
+    }
+  }
+  if (!result.is_err) {
+    *ret = result.val.ok;
+    return 1;
+  } else {
+    *err = result.val.err;
+    return 0;
+  }
+}
+
+bool fastly_backend_get_connect_timeout_ms(fastly_world_string_t *backend, fastly_timeout_ms_t *ret, fastly_error_t *err) {
+  __attribute__((aligned(4)))
+  uint8_t ret_area[8];
+  int32_t ptr = (int32_t) &ret_area;
+  __wasm_import_fastly_backend_get_connect_timeout_ms((int32_t) (*backend).ptr, (int32_t) (*backend).len, ptr);
+  fastly_result_timeout_ms_error_t result;
+  switch ((int32_t) (*((uint8_t*) (ptr + 0)))) {
+    case 0: {
+      result.is_err = false;
+      result.val.ok = (uint32_t) (*((int32_t*) (ptr + 4)));
+      break;
+    }
+    case 1: {
+      result.is_err = true;
+      result.val.err = (int32_t) (*((uint8_t*) (ptr + 4)));
+      break;
+    }
+  }
+  if (!result.is_err) {
+    *ret = result.val.ok;
+    return 1;
+  } else {
+    *err = result.val.err;
+    return 0;
+  }
+}
+
+bool fastly_backend_get_first_byte_timeout_ms(fastly_world_string_t *backend, fastly_timeout_ms_t *ret, fastly_error_t *err) {
+  __attribute__((aligned(4)))
+  uint8_t ret_area[8];
+  int32_t ptr = (int32_t) &ret_area;
+  __wasm_import_fastly_backend_get_first_byte_timeout_ms((int32_t) (*backend).ptr, (int32_t) (*backend).len, ptr);
+  fastly_result_timeout_ms_error_t result;
+  switch ((int32_t) (*((uint8_t*) (ptr + 0)))) {
+    case 0: {
+      result.is_err = false;
+      result.val.ok = (uint32_t) (*((int32_t*) (ptr + 4)));
+      break;
+    }
+    case 1: {
+      result.is_err = true;
+      result.val.err = (int32_t) (*((uint8_t*) (ptr + 4)));
+      break;
+    }
+  }
+  if (!result.is_err) {
+    *ret = result.val.ok;
+    return 1;
+  } else {
+    *err = result.val.err;
+    return 0;
+  }
+}
+
+bool fastly_backend_get_between_bytes_timeout_ms(fastly_world_string_t *backend, fastly_timeout_ms_t *ret, fastly_error_t *err) {
+  __attribute__((aligned(4)))
+  uint8_t ret_area[8];
+  int32_t ptr = (int32_t) &ret_area;
+  __wasm_import_fastly_backend_get_between_bytes_timeout_ms((int32_t) (*backend).ptr, (int32_t) (*backend).len, ptr);
+  fastly_result_timeout_ms_error_t result;
+  switch ((int32_t) (*((uint8_t*) (ptr + 0)))) {
+    case 0: {
+      result.is_err = false;
+      result.val.ok = (uint32_t) (*((int32_t*) (ptr + 4)));
+      break;
+    }
+    case 1: {
+      result.is_err = true;
+      result.val.err = (int32_t) (*((uint8_t*) (ptr + 4)));
+      break;
+    }
+  }
+  if (!result.is_err) {
+    *ret = result.val.ok;
+    return 1;
+  } else {
+    *err = result.val.err;
+    return 0;
+  }
+}
+
+bool fastly_backend_is_ssl(fastly_world_string_t *backend, bool *ret, fastly_error_t *err) {
+  __attribute__((aligned(1)))
+  uint8_t ret_area[2];
+  int32_t ptr = (int32_t) &ret_area;
+  __wasm_import_fastly_backend_is_ssl((int32_t) (*backend).ptr, (int32_t) (*backend).len, ptr);
+  fastly_result_bool_error_t result;
+  switch ((int32_t) (*((uint8_t*) (ptr + 0)))) {
+    case 0: {
+      result.is_err = false;
+      result.val.ok = (int32_t) (*((uint8_t*) (ptr + 1)));
+      break;
+    }
+    case 1: {
+      result.is_err = true;
+      result.val.err = (int32_t) (*((uint8_t*) (ptr + 1)));
+      break;
+    }
+  }
+  if (!result.is_err) {
+    *ret = result.val.ok;
+    return 1;
+  } else {
+    *err = result.val.err;
+    return 0;
+  }
+}
+
+bool fastly_backend_get_ssl_min_version(fastly_world_string_t *backend, fastly_tls_version_t *ret, fastly_error_t *err) {
+  __attribute__((aligned(1)))
+  uint8_t ret_area[2];
+  int32_t ptr = (int32_t) &ret_area;
+  __wasm_import_fastly_backend_get_ssl_min_version((int32_t) (*backend).ptr, (int32_t) (*backend).len, ptr);
+  fastly_result_tls_version_error_t result;
+  switch ((int32_t) (*((uint8_t*) (ptr + 0)))) {
+    case 0: {
+      result.is_err = false;
+      result.val.ok = (int32_t) (*((uint8_t*) (ptr + 1)));
+      break;
+    }
+    case 1: {
+      result.is_err = true;
+      result.val.err = (int32_t) (*((uint8_t*) (ptr + 1)));
+      break;
+    }
+  }
+  if (!result.is_err) {
+    *ret = result.val.ok;
+    return 1;
+  } else {
+    *err = result.val.err;
+    return 0;
+  }
+}
+
+bool fastly_backend_get_ssl_max_version(fastly_world_string_t *backend, fastly_tls_version_t *ret, fastly_error_t *err) {
+  __attribute__((aligned(1)))
+  uint8_t ret_area[2];
+  int32_t ptr = (int32_t) &ret_area;
+  __wasm_import_fastly_backend_get_ssl_max_version((int32_t) (*backend).ptr, (int32_t) (*backend).len, ptr);
+  fastly_result_tls_version_error_t result;
+  switch ((int32_t) (*((uint8_t*) (ptr + 0)))) {
+    case 0: {
+      result.is_err = false;
+      result.val.ok = (int32_t) (*((uint8_t*) (ptr + 1)));
+      break;
+    }
+    case 1: {
+      result.is_err = true;
+      result.val.err = (int32_t) (*((uint8_t*) (ptr + 1)));
       break;
     }
   }

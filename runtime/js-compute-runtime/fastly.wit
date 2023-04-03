@@ -229,6 +229,7 @@ default world fastly-world {
       ca-cert: option<string>,
       ciphers: option<string>,
       sni-hostname: option<string>,
+      dont-pool: option<bool>,
     }
     http-req-register-dynamic-backend: func(prefix: string, target: string, config: dynamic-backend-config) -> result<_, error>
 
@@ -483,6 +484,57 @@ default world fastly-world {
     }
 
     purge-surrogate-key: func(surrogate-key: string, soft-purge: bool) -> result<purge-result, error>
+
+    /*
+     * Fastly Backend
+     */
+
+    type timeout-ms = u32
+    type port = u16
+    enum backend-health {
+      unknown,
+      healthy,
+      unhealthy,
+    }
+
+    /// Returns true if a backend with this name exists.
+    backend-exists: func(backend: string) -> result<bool, error>
+
+    /// Returns true if a backend with this name is healthy.
+    backend-is-healthy: func(backend: string) -> result<backend-health, error>
+
+    /// Returns true if the backend is a "dynamic" backend.
+    backend-is-dynamic: func(backend: string) -> result<bool, error>
+
+    /// Get the host of this backend.
+    backend-get-host: func(backend: string) -> result<string, error>
+
+    /// Get the "override host" for this backend.
+    ///
+    /// This is used to change the `Host` header sent to the backend. See the Fastly documentation
+    /// on this topic here: https://docs.fastly.com/en/guides/specifying-an-override-host
+    backend-get-override-host: func(backend: string) -> result<string, error>
+
+    /// Get the remote TCP port of the backend connection for the request.
+    backend-get-port: func(backend: string) -> result<u16, error>
+
+    /// Get the connection timeout of the backend.
+    backend-get-connect-timeout-ms: func(backend: string) -> result<timeout-ms, error>
+
+    /// Get the first byte timeout of the backend.
+    backend-get-first-byte-timeout-ms: func(backend: string) -> result<timeout-ms, error>
+
+    /// Get the between byte timeout of the backend.
+    backend-get-between-bytes-timeout-ms: func(backend: string) -> result<timeout-ms, error>
+
+    /// Returns true if the backend is configured to use SSL.
+    backend-is-ssl: func(backend: string)  -> result<bool, error>
+
+    /// Get the minimum SSL version this backend will use.
+    backend-get-ssl-min-version: func(backend: string) -> result<tls-version, error>
+
+    /// Get the maximum SSL version this backend will use.
+    backend-get-ssl-max-version: func(backend: string) -> result<tls-version, error>
   }
 
   export js-compute-runtime: interface {
