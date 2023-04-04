@@ -127,7 +127,7 @@ routes.set('/', () => {
     if (error) { return error }
 
     actual = Reflect.ownKeys(Backend.prototype)
-    expected = ["constructor", "toString"]
+    expected = ["constructor", "toString", "toName"]
     error = assert(actual, expected, `Reflect.ownKeys(Backend.prototype)`)
     if (error) { return error }
 
@@ -144,6 +144,8 @@ routes.set('/', () => {
     error = assert(typeof Backend.prototype.constructor, 'function', `typeof Backend.prototype.constructor`)
     if (error) { return error }
     error = assert(typeof Backend.prototype.toString, 'function', `typeof Backend.prototype.toString`)
+    if (error) { return error }
+    error = assert(typeof Backend.prototype.toName, 'function', `typeof Backend.prototype.toName`)
     if (error) { return error }
 
     actual = Reflect.getOwnPropertyDescriptor(Backend.prototype.constructor, 'length')
@@ -184,6 +186,26 @@ routes.set('/', () => {
       "configurable": true
     }
     error = assert(actual, expected, `Reflect.getOwnPropertyDescriptor(Backend.prototype.toString, 'name')`)
+    if (error) { return error }
+
+    actual = Reflect.getOwnPropertyDescriptor(Backend.prototype.toName, 'length')
+    expected = {
+      "value": 0,
+      "writable": false,
+      "enumerable": false,
+      "configurable": true
+    }
+    error = assert(actual, expected, `Reflect.getOwnPropertyDescriptor(Backend.prototype.toName, 'length')`)
+    if (error) { return error }
+
+    actual = Reflect.getOwnPropertyDescriptor(Backend.prototype.toName, 'name')
+    expected = {
+      "value": "toName",
+      "writable": false,
+      "enumerable": false,
+      "configurable": true
+    }
+    error = assert(actual, expected, `Reflect.getOwnPropertyDescriptor(Backend.prototype.toName, 'name')`)
     if (error) { return error }
 
     return pass()

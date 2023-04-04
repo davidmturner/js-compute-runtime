@@ -831,7 +831,7 @@ JSString *Backend::name(JSContext *cx, JSObject *self) {
 }
 
 bool Backend::toString(JSContext *cx, unsigned argc, JS::Value *vp) {
-  METHOD_HEADER(0)
+  METHOD_HEADER(0);
   JS::RootedString name(cx, JS::GetReservedSlot(self, Backend::Slots::Name).toString());
   args.rval().setString(name);
   return true;
@@ -846,6 +846,7 @@ const JSPropertySpec Backend::static_properties[] = {
 };
 
 const JSFunctionSpec Backend::methods[] = {JS_FN("toString", toString, 0, JSPROP_ENUMERATE),
+                                           JS_FN("toName", toString, 0, JSPROP_ENUMERATE),
                                            JS_FS_END};
 
 const JSPropertySpec Backend::properties[] = {JS_PS_END};
