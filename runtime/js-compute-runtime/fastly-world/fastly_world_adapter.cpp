@@ -402,6 +402,8 @@ bool fastly_http_req_register_dynamic_backend(fastly_world_string_t *prefix,
     backend_config_mask |= BACKEND_CONFIG_CIPHERS;
   if (config->sni_hostname.is_some)
     backend_config_mask |= BACKEND_CONFIG_SNI_HOSTNAME;
+  if (config->dont_pool.is_some)
+    backend_config_mask |= BACKEND_CONFIG_DONT_POOL;
   fastly::DynamicBackendConfig backend_configuration{
       .host_override = config->host_override.val.ptr,
       .host_override_len = config->host_override.val.len,
@@ -689,4 +691,68 @@ bool fastly_async_io_is_ready(fastly_async_handle_t handle, bool *ret, fastly_er
   }
   *ret = (bool)ret_int;
   return true;
+}
+
+/*
+ * Fastly Backend
+ */
+bool fastly_backend_exists(fastly_world_string_t *backend, bool *ret, fastly_error_t *err) {
+  uint32_t ret_int;
+  if (!convert_result(fastly::backend_exists(backend->ptr, backend->len, &ret_int), err)) {
+    return false;
+  }
+  *ret = (bool)ret_int;
+  return true;
+}
+bool fastly_backend_is_healthy(fastly_world_string_t *backend, fastly_backend_health_t *ret,
+                               fastly_error_t *err) {
+  MOZ_ASSERT_UNREACHABLE("Not yet implemented");
+  return false;
+}
+bool fastly_backend_is_dynamic(fastly_world_string_t *backend, bool *ret, fastly_error_t *err) {
+  MOZ_ASSERT_UNREACHABLE("Not yet implemented");
+  return false;
+}
+bool fastly_backend_get_host(fastly_world_string_t *backend, fastly_world_string_t *ret,
+                             fastly_error_t *err) {
+  MOZ_ASSERT_UNREACHABLE("Not yet implemented");
+  return false;
+}
+bool fastly_backend_get_override_host(fastly_world_string_t *backend, fastly_world_string_t *ret,
+                                      fastly_error_t *err) {
+  MOZ_ASSERT_UNREACHABLE("Not yet implemented");
+  return false;
+}
+bool fastly_backend_get_port(fastly_world_string_t *backend, uint16_t *ret, fastly_error_t *err) {
+  MOZ_ASSERT_UNREACHABLE("Not yet implemented");
+  return false;
+}
+bool fastly_backend_get_connect_timeout_ms(fastly_world_string_t *backend, fastly_timeout_ms_t *ret,
+                                           fastly_error_t *err) {
+  MOZ_ASSERT_UNREACHABLE("Not yet implemented");
+  return false;
+}
+bool fastly_backend_get_first_byte_timeout_ms(fastly_world_string_t *backend,
+                                              fastly_timeout_ms_t *ret, fastly_error_t *err) {
+  MOZ_ASSERT_UNREACHABLE("Not yet implemented");
+  return false;
+}
+bool fastly_backend_get_between_bytes_timeout_ms(fastly_world_string_t *backend,
+                                                 fastly_timeout_ms_t *ret, fastly_error_t *err) {
+  MOZ_ASSERT_UNREACHABLE("Not yet implemented");
+  return false;
+}
+bool fastly_backend_is_ssl(fastly_world_string_t *backend, bool *ret, fastly_error_t *err) {
+  MOZ_ASSERT_UNREACHABLE("Not yet implemented");
+  return false;
+}
+bool fastly_backend_get_ssl_min_version(fastly_world_string_t *backend, fastly_tls_version_t *ret,
+                                        fastly_error_t *err) {
+  MOZ_ASSERT_UNREACHABLE("Not yet implemented");
+  return false;
+}
+bool fastly_backend_get_ssl_max_version(fastly_world_string_t *backend, fastly_tls_version_t *ret,
+                                        fastly_error_t *err) {
+  MOZ_ASSERT_UNREACHABLE("Not yet implemented");
+  return false;
 }

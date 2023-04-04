@@ -92,7 +92,7 @@ routes.set('/', () => {
 {
   routes.set("/backend/interface", async () => {
     let actual = Reflect.ownKeys(Backend)
-    let expected = ["prototype", "length", "name"]
+    let expected = ["prototype", "exists", "length", "name"]
     let error = assert(actual, expected, `Reflect.ownKeys(Backend)`)
     if (error) { return error }
 
@@ -104,6 +104,24 @@ routes.set('/', () => {
       "configurable": false
     }
     error = assert(actual, expected, `Reflect.getOwnPropertyDescriptor(Backend, 'prototype')`)
+    if (error) { return error }
+
+    actual = Reflect.getOwnPropertyDescriptor(Backend, 'exists')
+    expected = {
+      "value": Backend.exists,
+      "writable": true,
+      "enumerable": true,
+      "configurable": true
+    }
+    error = assert(actual, expected, `Reflect.getOwnPropertyDescriptor(Backend, 'exists')`)
+    if (error) { return error }
+
+    error = assert(typeof Backend.exists, 'function', `typeof Backend.exists`)
+    if (error) { return error }
+
+    error = assert(Backend.exists.length, 1, `Backend.exists.length`)
+    if (error) { return error }
+    error = assert(Backend.exists.name, "exists", `Backend.exists.name`)
     if (error) { return error }
 
     actual = Reflect.getOwnPropertyDescriptor(Backend, 'length')
@@ -213,7 +231,6 @@ routes.set('/', () => {
 
   // constructor
   {
-
     routes.set("/backend/constructor/called-as-regular-function", async () => {
       let error = assertThrows(() => {
         Backend()
@@ -1321,6 +1338,74 @@ routes.set('/', () => {
         return pass()
       });
     }
+  }
+
+  // exists
+  {
+    routes.set("/backend/exists/called-as-constructor-function", async () => {
+      let error = assertThrows(() => {
+        new Backend.exists()
+      }, TypeError, `Backend.exists is not a constructor`)
+      if (error) { return error }
+      return pass()
+    });
+    routes.set("/backend/exists/empty-parameter", async () => {
+      let error = assertThrows(() => {
+        Backend.exists()
+      }, TypeError, `Backend exists: At least 1 argument required, but only 0 passed`)
+      if (error) { return error }
+      return pass()
+    });
+    // https://tc39.es/ecma262/#sec-tostring
+    routes.set("/backend/exists/parameter-calls-7.1.17-ToString", async () => {
+      let sentinel;
+      const test = () => {
+        sentinel = Symbol();
+        const name = {
+          toString() {
+            throw sentinel;
+          }
+        }
+        Backend.exists(name)
+      }
+      let error = assertThrows(test)
+      if (error) { return error }
+      try {
+        test()
+      } catch (thrownError) {
+        let error = assert(thrownError, sentinel, 'thrownError === sentinel')
+        if (error) { return error }
+      }
+      error = assertThrows(() => Backend.exists(Symbol()), TypeError, `can't convert symbol to string`)
+      if (error) { return error }
+      return pass()
+    });
+
+    routes.set("/backend/exists/parameter-invalid", async () => {
+      // null
+      let error = assertThrows(() => Backend.exists(null), TypeError)
+      if (error) { return error }
+      // undefined
+      error = assertThrows(() => Backend.exists(undefined), TypeError)
+      if (error) { return error }
+      // .length > 254
+      error = assertThrows(() => Backend.exists('a'.repeat(255)), TypeError)
+      if (error) { return error }
+      // .length == 0
+      error = assertThrows(() => Backend.exists(''), TypeError)
+      if (error) { return error }
+      return pass()
+    });
+    routes.set("/backend/exists/happy-path-backend-exists", async () => {
+      let error = assert(Backend.exists('TheOrigin'), true, `Backend.exists('TheOrigin')`)
+      if (error) { return error }
+      return pass()
+    });
+    routes.set("/backend/exists/happy-path-backend-does-not-exist", async () => {
+      let error = assert(Backend.exists('meow'), false, `Backend.exists('meow')`)
+      if (error) { return error }
+      return pass()
+    });
   }
 }
 

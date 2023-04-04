@@ -33,6 +33,13 @@ namespace fastly {
 #define BACKEND_CONFIG_CA_CERT (1u << 9)
 #define BACKEND_CONFIG_CIPHERS (1u << 10)
 #define BACKEND_CONFIG_SNI_HOSTNAME (1u << 11)
+#define BACKEND_CONFIG_DONT_POOL (1u << 12)
+
+typedef enum BACKEND_HEALTH {
+  UNKNOWN = 0,
+  HEALTHY = 1,
+  UNHEALTHY = 2,
+} BACKEND_HEALTH;
 
 typedef enum TLS {
   VERSION_1 = 0,
@@ -355,6 +362,11 @@ int async_select(fastly_async_handle_t handles[], size_t handles_len, uint32_t t
 // type.
 WASM_IMPORT("fastly_async_io", "is_ready")
 int async_is_ready(fastly_async_handle_t handle, uint32_t *is_ready_out);
+
+// Returns 1 if a backend with this name exists.
+WASM_IMPORT("fastly_backend", "exists")
+int backend_exists(const char *name, size_t name_len, uint32_t *exists_out);
+
 } // namespace fastly
 #ifdef __cplusplus
 }

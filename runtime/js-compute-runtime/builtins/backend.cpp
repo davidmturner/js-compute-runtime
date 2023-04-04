@@ -837,38 +837,66 @@ bool Backend::toString(JSContext *cx, unsigned argc, JS::Value *vp) {
   return true;
 }
 
-const JSFunctionSpec Backend::static_methods[] = {
-    JS_FS_END,
-};
+namespace {
+JSString *parse_and_validate_name(JSContext *cx, JS::HandleValue name_val) {
+  if (name_val.isNullOrUndefined()) {
+    JS_ReportErrorNumberASCII(cx, GetErrorMessage, nullptr, JSMSG_BACKEND_NAME_NOT_SET);
+    return nullptr;
+  }
+  JS::RootedString name(cx, JS::ToString(cx, name_val));
+  if (!name) {
+    return nullptr;
+  }
+  auto length = JS::GetStringLength(name);
+  if (length > 254) {
+    JS_ReportErrorNumberASCII(cx, GetErrorMessage, nullptr, JSMSG_BACKEND_NAME_TOO_LONG);
+    return nullptr;
+  }
+  if (length == 0) {
+    JS_ReportErrorNumberASCII(cx, GetErrorMessage, nullptr, JSMSG_BACKEND_NAME_EMPTY);
+    return nullptr;
+  }
+  return name;
+}
+} // namespace
 
-const JSPropertySpec Backend::static_properties[] = {
-    JS_PS_END,
-};
+bool Backend::exists(JSContext *cx, unsigned argc, JS::Value *vp) {
+  JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
+  JS::RootedObject self(cx, &args.thisv().toObject());
+  if (!args.requireAtLeast(cx, "Backend exists", 1)) {
+    return false;
+  }
+
+  JS::RootedString name(cx, parse_and_validate_name(cx, args.get(0)));
+  if (!name) {
+    return false;
+  }
+  fastly_world_string_t name_str;
+  JS::UniqueChars nameChars = encode(cx, name, &name_str.len);
+  name_str.ptr = nameChars.get();
+  fastly_error_t err;
+  bool exists;
+  if (!fastly_backend_exists(&name_str, &exists, &err)) {
+    HANDLE_ERROR(cx, err);
+    return false;
+  }
+  args.rval().setBoolean(exists);
+  return true;
+}
 
 const JSFunctionSpec Backend::methods[] = {JS_FN("toString", toString, 0, JSPROP_ENUMERATE),
                                            JS_FN("toName", toString, 0, JSPROP_ENUMERATE),
                                            JS_FS_END};
 
 const JSPropertySpec Backend::properties[] = {JS_PS_END};
-const JSFunctionSpec Backend::static_methods[] = {JS_FS_END};
+const JSFunctionSpec Backend::static_methods[] = {JS_FN("exists", exists, 1, JSPROP_ENUMERATE),
+                                                  JS_FS_END};
 const JSPropertySpec Backend::static_properties[] = {JS_PS_END};
 
 bool Backend::set_name(JSContext *cx, JSObject *backend, JS::HandleValue name_val) {
-  if (name_val.isNullOrUndefined()) {
-    JS_ReportErrorNumberASCII(cx, GetErrorMessage, nullptr, JSMSG_BACKEND_NAME_NOT_SET);
-    return false;
-  }
-  JS::RootedString name(cx, JS::ToString(cx, name_val));
+  MOZ_ASSERT(is_instance(backend));
+  auto name = parse_and_validate_name(cx, name_val);
   if (!name) {
-    return false;
-  }
-  auto length = JS::GetStringLength(name);
-  if (length > 254) {
-    JS_ReportErrorNumberASCII(cx, GetErrorMessage, nullptr, JSMSG_BACKEND_NAME_TOO_LONG);
-    return false;
-  }
-  if (length == 0) {
-    JS_ReportErrorNumberASCII(cx, GetErrorMessage, nullptr, JSMSG_BACKEND_NAME_EMPTY);
     return false;
   }
 
@@ -878,6 +906,7 @@ bool Backend::set_name(JSContext *cx, JSObject *backend, JS::HandleValue name_va
 
 bool Backend::set_host_override(JSContext *cx, JSObject *backend,
                                 JS::HandleValue hostOverride_val) {
+  MOZ_ASSERT(is_instance(backend));
   auto hostOverride = JS::ToString(cx, hostOverride_val);
   if (!hostOverride) {
     return false;

@@ -50,7 +50,10 @@ public:
   static bool set_host_override(JSContext *cx, JSObject *backend, JS::HandleValue hostOverride_val);
   static bool set_name(JSContext *cx, JSObject *backend, JS::HandleValue name_val);
 
-  // prototype properties
+  // static methods
+  static bool exists(JSContext *cx, unsigned argc, JS::Value *vp);
+
+  // prototype methods
   static bool toName(JSContext *cx, unsigned argc, JS::Value *vp);
   static bool toString(JSContext *cx, unsigned argc, JS::Value *vp);
 

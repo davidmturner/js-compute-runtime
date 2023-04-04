@@ -89,7 +89,8 @@
         "__functional_base_03": "cpp",
         "memory_resource": "cpp",
         "numeric": "cpp",
-        "fastly_world.h": "c"
+        "fastly_world.h": "c",
+        "__availability": "cpp",
         "__bits": "cpp",
         "__verbose_abort": "cpp",
         "any": "cpp",
