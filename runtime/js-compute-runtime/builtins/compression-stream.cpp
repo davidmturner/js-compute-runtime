@@ -213,6 +213,9 @@ const JSPropertySpec CompressionStream::properties[] = {
     JS_PS_END,
 };
 
+const JSFunctionSpec CompressionStream::static_methods[] = {JS_FS_END};
+const JSPropertySpec CompressionStream::static_properties[] = {JS_PS_END};
+
 namespace {
 
 // Steps 2-6 of `new CompressionStream()`.

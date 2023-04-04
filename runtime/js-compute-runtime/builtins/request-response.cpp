@@ -1436,6 +1436,8 @@ const JSPropertySpec Request::properties[] = {
     JS_STRING_SYM_PS(toStringTag, "Request", JSPROP_READONLY),
     JS_PS_END,
 };
+const JSFunctionSpec Request::static_methods[] = {JS_FS_END};
+const JSPropertySpec Request::static_properties[] = {JS_PS_END};
 
 bool Request::init_class(JSContext *cx, JS::HandleObject global) {
   if (!init_class_impl(cx, global)) {
@@ -2567,6 +2569,8 @@ const JSPropertySpec Response::properties[] = {
     JS_STRING_SYM_PS(toStringTag, "Response", JSPROP_READONLY),
     JS_PS_END,
 };
+const JSFunctionSpec Response::static_methods[] = {JS_FS_END};
+const JSPropertySpec Response::static_properties[] = {JS_PS_END};
 
 /**
  * The `Response` constructor https://fetch.spec.whatwg.org/#dom-response

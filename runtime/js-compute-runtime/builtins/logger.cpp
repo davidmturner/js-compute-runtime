@@ -37,6 +37,9 @@ const JSFunctionSpec Logger::methods[] = {JS_FN("log", log, 1, JSPROP_ENUMERATE)
 
 const JSPropertySpec Logger::properties[] = {JS_PS_END};
 
+const JSFunctionSpec Logger::static_methods[] = {JS_FS_END};
+const JSPropertySpec Logger::static_properties[] = {JS_PS_END};
+
 JSObject *Logger::create(JSContext *cx, const char *name) {
   JS::RootedObject logger(cx, JS_NewObjectWithGivenProto(cx, &class_, proto_obj));
   if (!logger)

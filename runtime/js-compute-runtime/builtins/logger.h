@@ -19,6 +19,8 @@ public:
   static const JSPropertySpec static_properties[];
   static const JSFunctionSpec methods[];
   static const JSPropertySpec properties[];
+  static const JSPropertySpec static_properties[];
+  static const JSFunctionSpec static_methods[];
 
   static JSObject *create(JSContext *cx, const char *name);
   static bool constructor(JSContext *cx, unsigned argc, JS::Value *vp);

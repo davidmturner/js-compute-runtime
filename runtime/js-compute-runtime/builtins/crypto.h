@@ -19,6 +19,8 @@ public:
   static const JSPropertySpec static_properties[];
   static const JSFunctionSpec methods[];
   static const JSPropertySpec properties[];
+  static const JSPropertySpec static_properties[];
+  static const JSFunctionSpec static_methods[];
 
   static bool subtle_get(JSContext *cx, unsigned argc, JS::Value *vp);
   static bool get_random_values(JSContext *cx, unsigned argc, JS::Value *vp);

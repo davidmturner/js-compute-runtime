@@ -41,6 +41,8 @@ const JSFunctionSpec SecretStoreEntry::methods[] = {
     JS_FN("plaintext", plaintext, 0, JSPROP_ENUMERATE), JS_FS_END};
 
 const JSPropertySpec SecretStoreEntry::properties[] = {JS_PS_END};
+const JSFunctionSpec SecretStoreEntry::static_methods[] = {JS_FS_END};
+const JSPropertySpec SecretStoreEntry::static_properties[] = {JS_PS_END};
 
 bool SecretStoreEntry::constructor(JSContext *cx, unsigned argc, JS::Value *vp) {
   JS_ReportErrorUTF8(cx, "SecretStoreEntry can't be instantiated directly");
@@ -149,6 +151,8 @@ const JSPropertySpec SecretStore::static_properties[] = {
 const JSFunctionSpec SecretStore::methods[] = {JS_FN("get", get, 1, JSPROP_ENUMERATE), JS_FS_END};
 
 const JSPropertySpec SecretStore::properties[] = {JS_PS_END};
+const JSFunctionSpec SecretStore::static_methods[] = {JS_FS_END};
+const JSPropertySpec SecretStore::static_properties[] = {JS_PS_END};
 
 bool SecretStore::constructor(JSContext *cx, unsigned argc, JS::Value *vp) {
   REQUEST_HANDLER_ONLY("The SecretStore builtin");

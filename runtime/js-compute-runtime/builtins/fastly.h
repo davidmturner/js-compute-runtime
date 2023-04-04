@@ -22,6 +22,8 @@ public:
   static bool allowDynamicBackends;
 
   static const JSPropertySpec properties[];
+  static const JSPropertySpec static_properties[];
+  static const JSFunctionSpec static_methods[];
 
   static bool now(JSContext *cx, unsigned argc, JS::Value *vp);
   static bool dump(JSContext *cx, unsigned argc, JS::Value *vp);

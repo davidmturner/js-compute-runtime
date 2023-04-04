@@ -202,6 +202,9 @@ const JSPropertySpec Fastly::properties[] = {
             JSPROP_ENUMERATE),
     JS_PS_END};
 
+const JSFunctionSpec Fastly::static_methods[] = {JS_FS_END};
+const JSPropertySpec Fastly::static_properties[] = {JS_PS_END};
+
 bool Fastly::create(JSContext *cx, JS::HandleObject global, FastlyOptions options) {
   JS::RootedObject fastly(cx, JS_NewPlainObject(cx));
   if (!fastly) {

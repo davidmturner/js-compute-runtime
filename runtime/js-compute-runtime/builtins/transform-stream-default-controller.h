@@ -32,6 +32,8 @@ public:
   static const JSPropertySpec static_properties[];
   static const JSFunctionSpec methods[];
   static const JSPropertySpec properties[];
+  static const JSPropertySpec static_properties[];
+  static const JSFunctionSpec static_methods[];
 
   static bool Enqueue(JSContext *cx, JS::HandleObject controller, JS::HandleValue chunk);
   static bool Terminate(JSContext *cx, JS::HandleObject controller);

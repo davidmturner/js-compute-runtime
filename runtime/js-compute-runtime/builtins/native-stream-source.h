@@ -26,6 +26,9 @@ public:
   static const JSPropertySpec static_properties[];
   static const JSFunctionSpec methods[];
   static const JSPropertySpec properties[];
+  static const JSPropertySpec static_properties[];
+  static const JSFunctionSpec static_methods[];
+
   typedef bool PullAlgorithmImplementation(JSContext *cx, JS::CallArgs args,
                                            JS::HandleObject stream, JS::HandleObject owner,
                                            JS::HandleObject controller);

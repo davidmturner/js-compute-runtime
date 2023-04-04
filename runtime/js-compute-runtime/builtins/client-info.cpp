@@ -130,6 +130,9 @@ const JSPropertySpec ClientInfo::properties[] = {
     JS_PS_END,
 };
 
+const JSFunctionSpec ClientInfo::static_methods[] = {JS_FS_END};
+const JSPropertySpec ClientInfo::static_properties[] = {JS_PS_END};
+
 JSObject *ClientInfo::create(JSContext *cx) {
   return JS_NewObjectWithGivenProto(cx, &class_, proto_obj);
 }

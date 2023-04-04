@@ -849,6 +849,8 @@ const JSFunctionSpec Backend::methods[] = {JS_FN("toString", toString, 0, JSPROP
                                            JS_FS_END};
 
 const JSPropertySpec Backend::properties[] = {JS_PS_END};
+const JSFunctionSpec Backend::static_methods[] = {JS_FS_END};
+const JSPropertySpec Backend::static_properties[] = {JS_PS_END};
 
 bool Backend::set_name(JSContext *cx, JSObject *backend, JS::HandleValue name_val) {
   if (name_val.isNullOrUndefined()) {

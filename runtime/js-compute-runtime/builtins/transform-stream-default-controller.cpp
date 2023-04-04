@@ -128,6 +128,8 @@ const JSFunctionSpec TransformStreamDefaultController::methods[] = {
 
 const JSPropertySpec TransformStreamDefaultController::properties[] = {
     JS_PSG("desiredSize", desiredSize_get, JSPROP_ENUMERATE), JS_PS_END};
+const JSFunctionSpec TransformStreamDefaultController::static_methods[] = {JS_FS_END};
+const JSPropertySpec TransformStreamDefaultController::static_properties[] = {JS_PS_END};
 
 JSObject *TransformStreamDefaultController::create(
     JSContext *cx, JS::HandleObject stream,

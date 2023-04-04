@@ -763,6 +763,9 @@ const JSPropertySpec Headers::properties[] = {
     JS_PS_END,
 };
 
+const JSFunctionSpec Headers::static_methods[] = {JS_FS_END};
+const JSPropertySpec Headers::static_properties[] = {JS_PS_END};
+
 bool Headers::constructor(JSContext *cx, unsigned argc, JS::Value *vp) {
   CTOR_HEADER("Headers", 0);
   JS::RootedObject headersInstance(cx, JS_NewObjectForConstructor(cx, &class_, args));
