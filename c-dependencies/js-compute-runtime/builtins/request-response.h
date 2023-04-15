@@ -130,6 +130,7 @@ public:
     PendingRequest,
     ResponsePromise,
     IsDownstream,
+    AutoDecompress,
     Count,
   };
 
@@ -139,6 +140,7 @@ public:
   static bool set_cache_override(JSContext *cx, JS::HandleObject self,
                                  JS::HandleValue cache_override_val);
   static bool apply_cache_override(JSContext *cx, JS::HandleObject self);
+  static bool apply_auto_decompress(JSContext *cx, JS::HandleObject self);
 
   static fastly_request_handle_t request_handle(JSObject *obj);
   static fastly_pending_request_handle_t pending_handle(JSObject *obj);

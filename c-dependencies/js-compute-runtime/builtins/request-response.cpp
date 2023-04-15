@@ -1141,7 +1141,25 @@ bool Request::set_cache_override(JSContext *cx, JS::HandleObject self,
                       JS::ObjectValue(*override));
   return true;
 }
+bool Request::apply_auto_decompress(JSContext *cx, JS::HandleObject self) {
+  MOZ_ASSERT(cx);
+  MOZ_ASSERT(is_instance(self));
+  auto decompress =
+      JS::GetReservedSlot(self, static_cast<uint32_t>(Request::Slots::AutoDecompress)).toBoolean();
+  if (!decompress) {
+    return true;
+  }
 
+  fastly_error_t err;
+  fastly_content_encodings_t encodings_to_decompress = 0;
+  encodings_to_decompress |= FASTLY_CONTENT_ENCODINGS_GZIP;
+  if (!fastly_http_req_auto_decompress_response_set(Request::request_handle(self),
+                                                    encodings_to_decompress, &err)) {
+    HANDLE_ERROR(cx, err);
+    return false;
+  }
+  return true;
+}
 /**
  * Apply the CacheOverride to a host-side request handle.
  */
@@ -1628,6 +1646,7 @@ JSObject *Request::create(JSContext *cx, JS::HandleObject requestInstance, JS::H
   JS::RootedValue headers_val(cx);
   JS::RootedValue body_val(cx);
   JS::RootedValue backend_val(cx);
+  JS::RootedValue fastly_val(cx);
   JS::RootedValue cache_override(cx);
   if (init_val.isObject()) {
     JS::RootedObject init(cx, init_val.toObjectOrNull());
@@ -1635,6 +1654,7 @@ JSObject *Request::create(JSContext *cx, JS::HandleObject requestInstance, JS::H
         !JS_GetProperty(cx, init, "headers", &headers_val) ||
         !JS_GetProperty(cx, init, "body", &body_val) ||
         !JS_GetProperty(cx, init, "backend", &backend_val) ||
+        !JS_GetProperty(cx, init, "fastly", &fastly_val) ||
         !JS_GetProperty(cx, init, "cacheOverride", &cache_override)) {
       return nullptr;
     }
@@ -1927,6 +1947,24 @@ JSObject *Request::create(JSContext *cx, JS::HandleObject requestInstance, JS::H
     JS::SetReservedSlot(
         request, static_cast<uint32_t>(Slots::CacheOverride),
         JS::GetReservedSlot(input_request, static_cast<uint32_t>(Slots::CacheOverride)));
+  }
+
+  if (fastly_val.isObject()) {
+    JS::RootedValue decompress_response_val(cx);
+    JS::RootedObject fastly(cx, fastly_val.toObjectOrNull());
+    if (!JS_GetProperty(cx, fastly, "decompress", &decompress_response_val)) {
+      return nullptr;
+    }
+    auto value = JS::ToBoolean(decompress_response_val);
+    JS::SetReservedSlot(request, static_cast<uint32_t>(Slots::AutoDecompress),
+                        JS::BooleanValue(value));
+  } else if (input_request) {
+    JS::SetReservedSlot(
+        request, static_cast<uint32_t>(Slots::AutoDecompress),
+        JS::GetReservedSlot(input_request, static_cast<uint32_t>(Slots::AutoDecompress)));
+  } else {
+    JS::SetReservedSlot(request, static_cast<uint32_t>(Slots::AutoDecompress),
+                        JS::BooleanValue(false));
   }
 
   return request;

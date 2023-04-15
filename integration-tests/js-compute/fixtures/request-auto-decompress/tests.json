@@ -1,0 +1,42 @@
+{
+  "GET /request/constructor/fastly/decompress/true": {
+    "environments": ["viceroy", "c@e"],
+    "downstream_request": {
+      "method": "GET",
+      "pathname": "/request/constructor/fastly/decompress/true"
+    },
+    "downstream_response": {
+      "status": 200
+    }
+  },
+  "GET /request/constructor/fastly/decompress/false": {
+    "environments": ["viceroy", "c@e"],
+    "downstream_request": {
+      "method": "GET",
+      "pathname": "/request/constructor/fastly/decompress/false"
+    },
+    "downstream_response": {
+      "status": 200
+    }
+  },
+  "GET /fetch/requestinit/fastly/decompress/true": {
+    "environments": ["viceroy", "c@e"],
+    "downstream_request": {
+      "method": "GET",
+      "pathname": "/fetch/requestinit/fastly/decompress/true"
+    },
+    "downstream_response": {
+      "status": 200
+    }
+  },
+  "GET /fetch/requestinit/fastly/decompress/false": {
+    "environments": ["viceroy", "c@e"],
+    "downstream_request": {
+      "method": "GET",
+      "pathname": "/fetch/requestinit/fastly/decompress/false"
+    },
+    "downstream_response": {
+      "status": 200
+    }
+  }
+}
