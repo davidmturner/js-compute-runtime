@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <chrono>
 #include <cstring>
 #include <iostream>
 #include <optional>
@@ -185,6 +186,7 @@ bool ObjectStore::get(JSContext *cx, unsigned argc, JS::Value *vp) {
 
   JS::RootedValue key(cx, args.get(0));
 
+  auto start = std::chrono::system_clock::now();
   // Convert the key argument into a String following https://tc39.es/ecma262/#sec-tostring
   fastly_world_string_t key_str;
   JS::UniqueChars key_chars = encode(cx, key, &key_str.len);
@@ -192,14 +194,33 @@ bool ObjectStore::get(JSContext *cx, unsigned argc, JS::Value *vp) {
     return false;
   key_str.ptr = key_chars.get();
 
+  auto end = std::chrono::system_clock::now();
+  double diff = duration_cast<std::chrono::microseconds>(end - start).count();
+  if (debug_logging_enabled()) {
+    printf("Total time to convert key to string: %fms.\n", diff / 1000);
+  }
+
+  start = std::chrono::system_clock::now();
   if (!parse_and_validate_key(cx, &key_chars, key_str.len))
     return ReturnPromiseRejectedWithPendingError(cx, args);
 
+  end = std::chrono::system_clock::now();
+  diff = duration_cast<std::chrono::microseconds>(end - start).count();
+  if (debug_logging_enabled()) {
+    printf("Total time to parse and validate key: %fms.\n", diff / 1000);
+  }
+
+  start = std::chrono::system_clock::now();
   fastly_option_body_handle_t ret;
   fastly_error_t err;
   if (!fastly_object_store_lookup(object_store_handle(self), &key_str, &ret, &err)) {
     HANDLE_ERROR(cx, err);
     return false;
+  }
+  end = std::chrono::system_clock::now();
+  diff = duration_cast<std::chrono::microseconds>(end - start).count();
+  if (debug_logging_enabled()) {
+    printf("Total time to execute fastly_object_store_lookup hostcall: %fms.\n", diff / 1000);
   }
 
   // When no entry is found, we are going to resolve the Promise with `null`.
@@ -208,9 +229,15 @@ bool ObjectStore::get(JSContext *cx, unsigned argc, JS::Value *vp) {
     result.setNull();
     JS::ResolvePromise(cx, result_promise, result);
   } else {
+    start = std::chrono::system_clock::now();
     JS::RootedObject entry(cx, ObjectStoreEntry::create(cx, ret.val));
     if (!entry) {
       return false;
+    }
+    end = std::chrono::system_clock::now();
+    diff = duration_cast<std::chrono::microseconds>(end - start).count();
+    if (debug_logging_enabled()) {
+      printf("Total time to create ObjectStoreEntry: %fms.\n", diff / 1000);
     }
     JS::RootedValue result(cx);
     result.setObject(*entry);
