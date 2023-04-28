@@ -20,6 +20,11 @@ declare module "fastly:experimental" {
    * @hidden
    */
   export function enableDebugLogging(enabled: boolean): void;
+  /*
+   * @experimental
+   * @hidden
+   */
+  export function handleWebsocket(backend: string): void;
 
   /**
    * Embed a file as a Uint8Array.

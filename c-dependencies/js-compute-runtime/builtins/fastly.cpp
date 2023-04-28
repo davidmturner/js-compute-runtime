@@ -12,9 +12,11 @@
 #include "builtins/env.h"
 #include "builtins/fastly.h"
 #include "builtins/logger.h"
+#include "request-response.h"
 #include "builtins/shared/url.h"
 #include "core/geo_ip.h"
 #include "host_interface/host_call.h"
+#include <iostream>
 
 namespace builtins {
 
@@ -88,10 +90,37 @@ bool Fastly::getLogger(JSContext *cx, unsigned argc, JS::Value *vp) {
   return true;
 }
 
+bool Fastly::handoffWebsocket(JSContext *cx, unsigned argc, JS::Value *vp) {
+  JS::CallArgs args = CallArgsFromVp(argc, vp);
+  REQUEST_HANDLER_ONLY("handoffWebsocket");
+  if (!args.requireAtLeast(cx, "handoffWebsocket", 1)) {
+    return false;
+  }
+
+  // TODO: Check that we have not sent a response for this request already
+
+  auto backend_value = args.get(0);
+  fastly_world_string_t backend_str;
+  auto backend_chars = encode(cx, backend_value, &backend_str.len);
+  if (!backend_chars) {
+    return false;
+  }
+  backend_str.ptr = backend_chars.get();
+
+  fastly_error_t err;
+  if (!fastly_http_req_redirect_to_websocket_proxy(&backend_str, &err)) {
+    std::cout << "ouch: " << (int16_t)err << std::endl;
+    HANDLE_ERROR(cx, err);
+    return false;
+  }
+  std::cout << "err: " << (int16_t)err << std::endl;
+
+  return true;
+}
+
 bool Fastly::includeBytes(JSContext *cx, unsigned argc, JS::Value *vp) {
   JS::CallArgs args = CallArgsFromVp(argc, vp);
   INIT_ONLY("fastly.includeBytes");
-  JS::RootedObject self(cx, &args.thisv().toObject());
   if (!args.requireAtLeast(cx, "fastly.includeBytes", 1))
     return false;
 
@@ -227,6 +256,7 @@ bool Fastly::create(JSContext *cx, JS::HandleObject global, FastlyOptions option
       JS_FN("enableDebugLogging", enableDebugLogging, 1, JSPROP_ENUMERATE),
       JS_FN("getGeolocationForIpAddress", getGeolocationForIpAddress, 1, JSPROP_ENUMERATE),
       JS_FN("getLogger", getLogger, 1, JSPROP_ENUMERATE),
+      JS_FN("handoffWebsocket", handoffWebsocket, 1, JSPROP_ENUMERATE),
       JS_FN("includeBytes", includeBytes, 1, JSPROP_ENUMERATE),
       options.getExperimentalHighResolutionTimeMethodsEnabled() ? nowfn : end,
       end};
