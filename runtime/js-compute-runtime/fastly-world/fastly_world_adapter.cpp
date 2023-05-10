@@ -704,10 +704,29 @@ bool fastly_backend_exists(fastly_world_string_t *backend, bool *ret, fastly_err
   *ret = (bool)ret_int;
   return true;
 }
+
+fastly_backend_health_t convert_fastly_backend_health(uint32_t version) {
+  switch (version) {
+  case 0:
+    return FASTLY_BACKEND_HEALTH_UNKNOWN;
+  case 1:
+    return FASTLY_BACKEND_HEALTH_HEALTHY;
+  case 2:
+    return FASTLY_BACKEND_HEALTH_UNHEALTHY;
+  default:
+    return FASTLY_BACKEND_HEALTH_UNKNOWN;
+  }
+}
+
 bool fastly_backend_is_healthy(fastly_world_string_t *backend, fastly_backend_health_t *ret,
                                fastly_error_t *err) {
-  MOZ_ASSERT_UNREACHABLE("Not yet implemented");
-  return false;
+  uint32_t fastly_backend_health;
+  if (!convert_result(
+          fastly::backend_is_healthy(backend->ptr, backend->len, &fastly_backend_health), err)) {
+    return false;
+  }
+  *ret = convert_fastly_backend_health(fastly_backend_health);
+  return true;
 }
 bool fastly_backend_is_dynamic(fastly_world_string_t *backend, bool *ret, fastly_error_t *err) {
   MOZ_ASSERT_UNREACHABLE("Not yet implemented");

@@ -51,6 +51,7 @@ public:
   // static methods
   static bool exists(JSContext *cx, unsigned argc, JS::Value *vp);
   static bool fromName(JSContext *cx, unsigned argc, JS::Value *vp);
+  static bool isHealthy(JSContext *cx, unsigned argc, JS::Value *vp);
 
   // prototype methods
   static bool toName(JSContext *cx, unsigned argc, JS::Value *vp);

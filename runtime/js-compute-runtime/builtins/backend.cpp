@@ -930,14 +930,51 @@ bool Backend::fromName(JSContext *cx, unsigned argc, JS::Value *vp) {
   return true;
 }
 
+bool Backend::isHealthy(JSContext *cx, unsigned argc, JS::Value *vp) {
+  JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
+  JS::RootedObject self(cx, &args.thisv().toObject());
+  if (!args.requireAtLeast(cx, "Backend.isHealthy", 1)) {
+    return false;
+  }
+
+  JS::RootedString name(cx, parse_and_validate_name(cx, args.get(0)));
+  if (!name) {
+    return false;
+  }
+  fastly_world_string_t name_str;
+  JS::UniqueChars nameChars = encode(cx, name, &name_str.len);
+  name_str.ptr = nameChars.get();
+  fastly_error_t err;
+  bool exists;
+  if (!fastly_backend_exists(&name_str, &exists, &err)) {
+    HANDLE_ERROR(cx, err);
+    return false;
+  }
+
+  if (!exists) {
+    JS_ReportErrorNumberUTF8(cx, GetErrorMessage, nullptr,
+                             JSMSG_BACKEND_FROMNAME_BACKEND_DOES_NOT_EXIST, name_str.ptr);
+    return false;
+  }
+
+  fastly_backend_health_t health;
+  if (!fastly_backend_is_healthy(&name_str, &health, &err)) {
+    HANDLE_ERROR(cx, err);
+    return false;
+  }
+
+  args.rval().setBoolean(health == FASTLY_BACKEND_HEALTH_HEALTHY);
+  return true;
+}
+
 const JSFunctionSpec Backend::methods[] = {JS_FN("toString", toString, 0, JSPROP_ENUMERATE),
                                            JS_FN("toName", toString, 0, JSPROP_ENUMERATE),
                                            JS_FS_END};
 
 const JSPropertySpec Backend::properties[] = {JS_PS_END};
-const JSFunctionSpec Backend::static_methods[] = {JS_FN("exists", exists, 1, JSPROP_ENUMERATE),
-                                                  JS_FN("fromName", fromName, 1, JSPROP_ENUMERATE),
-                                                  JS_FS_END};
+const JSFunctionSpec Backend::static_methods[] = {
+    JS_FN("exists", exists, 1, JSPROP_ENUMERATE), JS_FN("fromName", fromName, 1, JSPROP_ENUMERATE),
+    JS_FN("isHealthy", isHealthy, 1, JSPROP_ENUMERATE), JS_FS_END};
 const JSPropertySpec Backend::static_properties[] = {JS_PS_END};
 
 bool Backend::set_name(JSContext *cx, JSObject *backend, JS::HandleValue name_val) {

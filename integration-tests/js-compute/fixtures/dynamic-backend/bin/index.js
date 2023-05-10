@@ -89,7 +89,7 @@ routes.set('/', () => {
 {
   routes.set("/backend/interface", async () => {
     let actual = Reflect.ownKeys(Backend)
-    let expected = ["prototype", "exists", "fromName", "length", "name"]
+    let expected = ["prototype", "exists", "fromName", "isHealthy", "length", "name"]
     let error = assert(actual, expected, `Reflect.ownKeys(Backend)`)
     if (error) { return error }
 
@@ -137,6 +137,24 @@ routes.set('/', () => {
     error = assert(Backend.fromName.length, 1, `Backend.fromName.length`)
     if (error) { return error }
     error = assert(Backend.fromName.name, "fromName", `Backend.fromName.name`)
+    if (error) { return error }
+
+    actual = Reflect.getOwnPropertyDescriptor(Backend, 'isHealthy')
+    expected = {
+      "value": Backend.isHealthy,
+      "writable": true,
+      "enumerable": true,
+      "configurable": true
+    }
+    error = assert(actual, expected, `Reflect.getOwnPropertyDescriptor(Backend, 'isHealthy')`)
+    if (error) { return error }
+
+    error = assert(typeof Backend.isHealthy, 'function', `typeof Backend.isHealthy`)
+    if (error) { return error }
+
+    error = assert(Backend.isHealthy.length, 1, `Backend.isHealthy.length`)
+    if (error) { return error }
+    error = assert(Backend.isHealthy.name, "isHealthy", `Backend.isHealthy.name`)
     if (error) { return error }
 
     actual = Reflect.getOwnPropertyDescriptor(Backend, 'length')
@@ -1493,6 +1511,75 @@ routes.set('/', () => {
     });
     routes.set("/backend/fromName/happy-path-backend-does-not-exist", async () => {
       let error = assertThrows(() => Backend.fromName('meow'), Error, "Backend.fromName: backend named 'meow' does not exist")
+      if (error) { return error }
+      return pass()
+    });
+  }
+
+  // isHealthy
+  {
+    routes.set("/backend/isHealthy/called-as-constructor-function", async () => {
+      let error = assertThrows(() => {
+        new Backend.isHealthy()
+      }, TypeError, `Backend.isHealthy is not a constructor`)
+      if (error) { return error }
+      return pass()
+    });
+    routes.set("/backend/isHealthy/empty-parameter", async () => {
+      let error = assertThrows(() => {
+        Backend.isHealthy()
+      }, TypeError, `Backend.isHealthy: At least 1 argument required, but only 0 passed`)
+      if (error) { return error }
+      return pass()
+    });
+    // https://tc39.es/ecma262/#sec-tostring
+    routes.set("/backend/isHealthy/parameter-calls-7.1.17-ToString", async () => {
+      let sentinel;
+      const test = () => {
+        sentinel = Symbol();
+        const name = {
+          toString() {
+            throw sentinel;
+          }
+        }
+        Backend.isHealthy(name)
+      }
+      let error = assertThrows(test)
+      if (error) { return error }
+      try {
+        test()
+      } catch (thrownError) {
+        let error = assert(thrownError, sentinel, 'thrownError === sentinel')
+        if (error) { return error }
+      }
+      error = assertThrows(() => Backend.isHealthy(Symbol()), TypeError, `can't convert symbol to string`)
+      if (error) { return error }
+      return pass()
+    });
+
+    routes.set("/backend/isHealthy/parameter-invalid", async () => {
+      // null
+      let error = assertThrows(() => Backend.isHealthy(null), TypeError)
+      if (error) { return error }
+      // undefined
+      error = assertThrows(() => Backend.isHealthy(undefined), TypeError)
+      if (error) { return error }
+      // .length > 254
+      error = assertThrows(() => Backend.isHealthy('a'.repeat(255)), TypeError)
+      if (error) { return error }
+      // .length == 0
+      error = assertThrows(() => Backend.isHealthy(''), TypeError)
+      if (error) { return error }
+      return pass()
+    });
+    routes.set("/backend/isHealthy/happy-path-backend-exists", async () => {
+      let error = assert(typeof Backend.isHealthy('TheOrigin'), 'boolean', "typeof Backend.isHealthy('TheOrigin')");
+      if (error) { return error }
+
+      return pass()
+    });
+    routes.set("/backend/isHealthy/happy-path-backend-does-not-exist", async () => {
+      let error = assertThrows(() => Backend.isHealthy('meow'), Error, "Backend.isHealthy: backend named 'meow' does not exist")
       if (error) { return error }
       return pass()
     });

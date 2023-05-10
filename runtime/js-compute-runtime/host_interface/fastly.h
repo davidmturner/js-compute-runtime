@@ -367,6 +367,10 @@ int async_is_ready(fastly_async_handle_t handle, uint32_t *is_ready_out);
 WASM_IMPORT("fastly_backend", "exists")
 int backend_exists(const char *name, size_t name_len, uint32_t *exists_out);
 
+// Returns 1 if a backend is healthy.
+WASM_IMPORT("fastly_backend", "is_healthy")
+int backend_is_healthy(const char *name, size_t name_len, uint32_t *is_healthy_out);
+
 } // namespace fastly
 #ifdef __cplusplus
 }
