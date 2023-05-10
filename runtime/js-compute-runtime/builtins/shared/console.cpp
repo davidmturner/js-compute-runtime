@@ -440,8 +440,7 @@ const JSFunctionSpec Console::methods[] = {
     JS_FS_END};
 
 const JSPropertySpec Console::properties[] = {JS_PS_END};
-const JSFunctionSpec Console::static_methods[] = {JS_FS_END};
-const JSPropertySpec Console::static_properties[] = {JS_PS_END};
+
 bool Console::create(JSContext *cx, JS::HandleObject global) {
   JS::RootedObject console(cx, JS_NewPlainObject(cx));
   if (!console)

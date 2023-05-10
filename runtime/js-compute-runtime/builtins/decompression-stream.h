@@ -27,8 +27,6 @@ public:
   static const JSPropertySpec static_properties[];
   static const JSFunctionSpec methods[];
   static const JSPropertySpec properties[];
-  static const JSPropertySpec static_properties[];
-  static const JSFunctionSpec static_methods[];
 
   static const unsigned ctor_length = 1;
 

@@ -34,8 +34,6 @@ public:
 
   static const JSFunctionSpec methods[];
   static const JSPropertySpec properties[];
-  static const JSPropertySpec static_properties[];
-  static const JSFunctionSpec static_methods[];
 
   inline static JS::PersistentRootedObject backends;
 
@@ -52,6 +50,7 @@ public:
 
   // static methods
   static bool exists(JSContext *cx, unsigned argc, JS::Value *vp);
+  static bool fromName(JSContext *cx, unsigned argc, JS::Value *vp);
 
   // prototype methods
   static bool toName(JSContext *cx, unsigned argc, JS::Value *vp);

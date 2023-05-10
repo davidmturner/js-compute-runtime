@@ -35,20 +35,17 @@ routes.set('/', () => {
   return new Response(JSON.stringify(test_routes), { 'headers': { 'content-type': 'application/json' } });
 });
 
-/// The backend name is already in use.
-
-
 // implicit dynamic backend
 {
   routes.set("/implicit-dynamic-backend/dynamic-backends-disabled", async () => {
     allowDynamicBackends(false);
-    let error = await assertRejects(() => fetch('https://httpbin.org/headers'));
+    let error = await assertRejects(() => fetch('https://http-me.glitch.me/now'));
     if (error) { return error }
     return pass()
   });
   routes.set("/implicit-dynamic-backend/dynamic-backends-enabled", async () => {
     allowDynamicBackends(true);
-    let error = await assertResolves(() => fetch('https://httpbin.org/headers'));
+    let error = await assertResolves(() => fetch('https://http-me.glitch.me/now'));
     if (error) { return error }
     error = await assertResolves(() => fetch('https://www.fastly.com'));
     if (error) { return error }
@@ -56,9 +53,9 @@ routes.set('/', () => {
   });
   routes.set("/implicit-dynamic-backend/dynamic-backends-enabled-called-twice", async () => {
     allowDynamicBackends(true);
-    let error = await assertResolves(() => fetch('https://httpbin.org/headers'));
+    let error = await assertResolves(() => fetch('https://http-me.glitch.me/now'));
     if (error) { return error }
-    error = await assertResolves(() => fetch('https://httpbin.org/headers'));
+    error = await assertResolves(() => fetch('https://http-me.glitch.me/now'));
     if (error) { return error }
     return pass()
   });
@@ -68,8 +65,8 @@ routes.set('/', () => {
 {
   routes.set("/explicit-dynamic-backend/dynamic-backends-enabled-all-fields", async () => {
     allowDynamicBackends(true);
-    let backend = createValidHttpBinBackend();
-    let error = await assertResolves(() => fetch('https://httpbin.org/headers', {
+    let backend = createValidHttpMeBackend();
+    let error = await assertResolves(() => fetch('https://http-me.glitch.me/now', {
       backend,
       cacheOverride: new CacheOverride("pass"),
     }));
@@ -92,7 +89,7 @@ routes.set('/', () => {
 {
   routes.set("/backend/interface", async () => {
     let actual = Reflect.ownKeys(Backend)
-    let expected = ["prototype", "exists", "length", "name"]
+    let expected = ["prototype", "exists", "fromName", "length", "name"]
     let error = assert(actual, expected, `Reflect.ownKeys(Backend)`)
     if (error) { return error }
 
@@ -122,6 +119,24 @@ routes.set('/', () => {
     error = assert(Backend.exists.length, 1, `Backend.exists.length`)
     if (error) { return error }
     error = assert(Backend.exists.name, "exists", `Backend.exists.name`)
+    if (error) { return error }
+
+    actual = Reflect.getOwnPropertyDescriptor(Backend, 'fromName')
+    expected = {
+      "value": Backend.fromName,
+      "writable": true,
+      "enumerable": true,
+      "configurable": true
+    }
+    error = assert(actual, expected, `Reflect.getOwnPropertyDescriptor(Backend, 'fromName')`)
+    if (error) { return error }
+
+    error = assert(typeof Backend.fromName, 'function', `typeof Backend.fromName`)
+    if (error) { return error }
+
+    error = assert(Backend.fromName.length, 1, `Backend.fromName.length`)
+    if (error) { return error }
+    error = assert(Backend.fromName.name, "fromName", `Backend.fromName.name`)
     if (error) { return error }
 
     actual = Reflect.getOwnPropertyDescriptor(Backend, 'length')
@@ -1352,7 +1367,7 @@ routes.set('/', () => {
     routes.set("/backend/exists/empty-parameter", async () => {
       let error = assertThrows(() => {
         Backend.exists()
-      }, TypeError, `Backend exists: At least 1 argument required, but only 0 passed`)
+      }, TypeError, `Backend.exists: At least 1 argument required, but only 0 passed`)
       if (error) { return error }
       return pass()
     });
@@ -1407,64 +1422,129 @@ routes.set('/', () => {
       return pass()
     });
   }
+
+  // fromName
+  {
+    routes.set("/backend/fromName/called-as-constructor-function", async () => {
+      let error = assertThrows(() => {
+        new Backend.fromName()
+      }, TypeError, `Backend.fromName is not a constructor`)
+      if (error) { return error }
+      return pass()
+    });
+    routes.set("/backend/fromName/empty-parameter", async () => {
+      let error = assertThrows(() => {
+        Backend.fromName()
+      }, TypeError, `Backend.fromName: At least 1 argument required, but only 0 passed`)
+      if (error) { return error }
+      return pass()
+    });
+    // https://tc39.es/ecma262/#sec-tostring
+    routes.set("/backend/fromName/parameter-calls-7.1.17-ToString", async () => {
+      let sentinel;
+      const test = () => {
+        sentinel = Symbol();
+        const name = {
+          toString() {
+            throw sentinel;
+          }
+        }
+        Backend.fromName(name)
+      }
+      let error = assertThrows(test)
+      if (error) { return error }
+      try {
+        test()
+      } catch (thrownError) {
+        let error = assert(thrownError, sentinel, 'thrownError === sentinel')
+        if (error) { return error }
+      }
+      error = assertThrows(() => Backend.fromName(Symbol()), TypeError, `can't convert symbol to string`)
+      if (error) { return error }
+      return pass()
+    });
+
+    routes.set("/backend/fromName/parameter-invalid", async () => {
+      // null
+      let error = assertThrows(() => Backend.fromName(null), TypeError)
+      if (error) { return error }
+      // undefined
+      error = assertThrows(() => Backend.fromName(undefined), TypeError)
+      if (error) { return error }
+      // .length > 254
+      error = assertThrows(() => Backend.fromName('a'.repeat(255)), TypeError)
+      if (error) { return error }
+      // .length == 0
+      error = assertThrows(() => Backend.fromName(''), TypeError)
+      if (error) { return error }
+      return pass()
+    });
+    routes.set("/backend/fromName/happy-path-backend-exists", async () => {
+      allowDynamicBackends(false);
+      let error = assert(Backend.fromName('TheOrigin') instanceof Backend, true, `Backend.fromName('TheOrigin') instanceof Backend`)
+      if (error) { return error }
+
+      error = await assertResolves(() => fetch('https://http-me.glitch.me/now', {
+        backend: Backend.fromName('TheOrigin'),
+      }));
+      if (error) { return error }
+
+      return pass()
+    });
+    routes.set("/backend/fromName/happy-path-backend-does-not-exist", async () => {
+      let error = assertThrows(() => Backend.fromName('meow'), Error, "Backend.fromName: backend named 'meow' does not exist")
+      if (error) { return error }
+      return pass()
+    });
+  }
 }
 
-function createValidHttpBinBackend() {
+function createValidHttpMeBackend() {
   // We are defining all the possible fields here but any number of fields can be defined - the ones which are not defined will use their default value instead.
   return new Backend(
     {
-      name: 'httpbin',
-      target: 'httpbin.org',
-      hostOverride: "httpbin.org",
+      name: 'http-me',
+      target: 'http-me.glitch.me',
+      hostOverride: "http-me.glitch.me",
       connectTimeout: 1000,
       firstByteTimeout: 15000,
       betweenBytesTimeout: 10000,
       useSSL: true,
       tlsMinVersion: 1.2,
       tlsMaxVersion: 1.2,
-      certificateHostname: "httpbin.org",
+      certificateHostname: "http-me.glitch.me",
       checkCertificate: true,
       caCertificate: `-----BEGIN CERTIFICATE-----
-MIIGgjCCBWqgAwIBAgIQASW9vtgUNIzM07bVg9HdEzANBgkqhkiG9w0BAQsFADBY
-MQswCQYDVQQGEwJCRTEZMBcGA1UEChMQR2xvYmFsU2lnbiBudi1zYTEuMCwGA1UE
-AxMlR2xvYmFsU2lnbiBBdGxhcyBSMyBEViBUTFMgQ0EgMjAyMiBRMTAeFw0yMjAz
-MzExNDI4NTBaFw0yMzA1MDIxNDI4NDlaMBkxFzAVBgNVBAMMDnd3dy5mYXN0bHku
-Y29tMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAmtLSpTiRzJaFiAEi
-Eua36KwkZBm647y7cEkYEu6GgStXAWtzDF4ttzI8q9iRpqlljFDjQF2EeWLXN2X2
-MEQPxKOOkM+OuJny0pXDCkKiSGS6MwVzNqCNW5tnxkJMMUAq5ciyQFwF72Z+ymlo
-NGCl3CIDAJbHcudm4CiVR5ip7KYFH7uaBRLPXtMLX2lmQ1q2TbU/GXrbDhz5OXCD
-H9SKAUSHLqwLplj8mojxWayda9zy3bqbTVXsqRVW0Xar62T33Uis0fm+xW4hJbxf
-bya5I0aQbAjtxvEjfUa1kSalUqPwfHOXMvvXwoqUIKk1ndZScWl9TGLH84izTCPw
-bOVsTQIDAQABo4IDhTCCA4EwOwYDVR0RBDQwMoIOd3d3LmZhc3RseS5jb22CFGRl
-dmVsb3Blci5mYXN0bHkuY29tggpmYXN0bHkuY29tMA4GA1UdDwEB/wQEAwIFoDAd
-BgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwHQYDVR0OBBYEFCYC4rPzDtR8
-EI3XULw/wr8lfnv2MFcGA1UdIARQME4wCAYGZ4EMAQIBMEIGCisGAQQBoDIKAQMw
-NDAyBggrBgEFBQcCARYmaHR0cHM6Ly93d3cuZ2xvYmFsc2lnbi5jb20vcmVwb3Np
-dG9yeS8wDAYDVR0TAQH/BAIwADCBngYIKwYBBQUHAQEEgZEwgY4wQAYIKwYBBQUH
-MAGGNGh0dHA6Ly9vY3NwLmdsb2JhbHNpZ24uY29tL2NhL2dzYXRsYXNyM2R2dGxz
-Y2EyMDIycTEwSgYIKwYBBQUHMAKGPmh0dHA6Ly9zZWN1cmUuZ2xvYmFsc2lnbi5j
-b20vY2FjZXJ0L2dzYXRsYXNyM2R2dGxzY2EyMDIycTEuY3J0MB8GA1UdIwQYMBaA
-FJwqZ9C0gzFbgMspllV1CTc4uDylMEgGA1UdHwRBMD8wPaA7oDmGN2h0dHA6Ly9j
-cmwuZ2xvYmFsc2lnbi5jb20vY2EvZ3NhdGxhc3IzZHZ0bHNjYTIwMjJxMS5jcmww
-ggF/BgorBgEEAdZ5AgQCBIIBbwSCAWsBaQB3AK33vvp8/xDIi509nB4+GGq0Zyld
-z7EMJMqFhjTr3IKKAAABf+BhC9UAAAQDAEgwRgIhAI/TiJpulEywYHMuudQ6fYcK
-dl18wDnJtAD+3JqFkrXuAiEA+i6ryPZTeENZJ6wEgRnndsggk8blsfch13e4s76u
-WngAdQB6MoxU2LcttiDqOOBSHumEFnAyE4VNO9IrwTpXo1LrUgAAAX/gYQwqAAAE
-AwBGMEQCIEldTkse3joAWr1llSoi9EOle0K0hz086GrCjL5YDhXkAiARW5dUit2q
-Tq/mD+aN+XHfupYiYC7htPvHMWM6iUHPFgB3ALNzdwfhhFD4Y4bWBancEQlKeS2x
-ZwwLh9zwAw55NqWaAAABf+BhDFQAAAQDAEgwRgIhAIQ1nuPDm08OuXDmLBkreA7L
-LdGLmdhnJOdzOW0n7PDGAiEA4cEZYQ+uFrAoIHezQXBe05/ovXLacu5SVoInRJIK
-gBYwDQYJKoZIhvcNAQELBQADggEBAPH+sQGtGBE6BlC0Zp02rJo/1QCPC+/L1T1+
-uErHb0175NKnxXmT0HYoXr3gduMoMFXQr0VkhtQzCq7OaAX89+UdQ/OkfdU6CK0z
-H4318J11ZShIHqGUCL+w27JsAgzJw/9UQBfT3FLCto735lwfo/l6HyD7qNqNYwhK
-UlkETWIEFB5CUAvG5mVmNbnUI8fnF3CvEB7IJcX9DxIkfsS08+4lMi3jHFMthJqY
-N5RGelXh07FAawRDugRPO0gh5bHo+hxZnWYTW9s6+A/D9E3pP2OJcyvhnvtWUrjg
-rgzylmjRmAH2KP86mK9jRwFvTdn666JZFKzpubei6XjWVdG/eS8=
------END CERTIFICATE-----
-`,
+MIIEszCCA5ugAwIBAgIQD8HvjzwnK+aOL5a3DcNyrTANBgkqhkiG9w0BAQsFADBG
+MQswCQYDVQQGEwJVUzEPMA0GA1UEChMGQW1hem9uMRUwEwYDVQQLEwxTZXJ2ZXIg
+Q0EgMUIxDzANBgNVBAMTBkFtYXpvbjAeFw0yMzAxMDIwMDAwMDBaFw0yNDAyMDEy
+MzU5NTlaMBUxEzARBgNVBAMTCmdsaXRjaC5jb20wggEiMA0GCSqGSIb3DQEBAQUA
+A4IBDwAwggEKAoIBAQC0m3Y7ixiv26nXGxCcT7TBF6dan/CzLlJo5UpbExT+Q6Cr
+DnjTEB25EiH65QNcudcPZiiWte9AKFZfILZcBcy+xxVeLN0klOtDU2Y+wPcEC74D
+kFoDlCjrwPk4dbsjFxJWpwEvZclADA0dEhluhQkcLYUyDL5gY2Pzy4Cn+A4G3Miz
+PfraWAUlawbW9fb9iNXSXBmu2+SlHt0TR/lZhBcUJihwGvWlOst5ZdXYoHt8n2t5
+xyzYMa6Iz8HsLKHxHdPBSL5155rszSNi8F+b2DdElfU9s19JSQfLBKue9vNWEXeV
+pWJFiSza0FvtbmEmvgi2zNeeRKD0Sl9f2tbsrBWjAgMBAAGjggHMMIIByDAfBgNV
+HSMEGDAWgBRZpGYGUqB7lZI8o5QHJ5Z0W/k90DAdBgNVHQ4EFgQUBU50uyvxOfNs
+X/HsfNM7TFHyuf8waQYDVR0RBGIwYIIKZ2xpdGNoLmNvbYIKKi5nb21peC5tZYIJ
+Z29taXguY29tgghnb21peC5tZYIJZ2xpdGNoLm1lggwqLmdsaXRjaC5jb22CCyou
+Z29taXguY29tggsqLmdsaXRjaC5tZTAOBgNVHQ8BAf8EBAMCBaAwHQYDVR0lBBYw
+FAYIKwYBBQUHAwEGCCsGAQUFBwMCMD0GA1UdHwQ2MDQwMqAwoC6GLGh0dHA6Ly9j
+cmwuc2NhMWIuYW1hem9udHJ1c3QuY29tL3NjYTFiLTEuY3JsMBMGA1UdIAQMMAow
+CAYGZ4EMAQIBMHUGCCsGAQUFBwEBBGkwZzAtBggrBgEFBQcwAYYhaHR0cDovL29j
+c3Auc2NhMWIuYW1hem9udHJ1c3QuY29tMDYGCCsGAQUFBzAChipodHRwOi8vY3J0
+LnNjYTFiLmFtYXpvbnRydXN0LmNvbS9zY2ExYi5jcnQwDAYDVR0TAQH/BAIwADAT
+BgorBgEEAdZ5AgQDAQH/BAIFADANBgkqhkiG9w0BAQsFAAOCAQEAjY25ZiVsL+kj
+WIOAAQd9SgG4/lqcmbBoPJI12pNhDrWUsLabwmq6Ru9Sl+EPK0ZxU6qcUEefdnwF
+oMsQpRFhdH/hwWwoJicNJdVEkXp27uoeLZVMPoZWdeXrz8QIKuqPhKtm0E2mGQ1S
+v8BoVUX4G7MEChwhzjweTXU/PeqRGzklDzVwQJP910481GQqZTltQr0FP8yKR8Or
+/pHvDufl8aceIB9DRiO8hlsFR+PJeNMeQRpj2F/pe6Cok6WFKPc6io8N54Zzx1pa
+sdm536CntsJGBvA4FUGNlEK/MkbBGi8/7GQrEke3fRcW5A7hJKTqb1eB2NYQOqBx
+8GIMPI46Lw==
+-----END CERTIFICATE-----`,
       // Colon-delimited list of permitted SSL Ciphers
       ciphers: "ECDHE-RSA-AES128-GCM-SHA256:!RC4",
-      sniHostname: "httpbin.org",
+      sniHostname: "http-me.glitch.me",
     }
   );
 }

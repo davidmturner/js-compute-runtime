@@ -378,8 +378,7 @@ const JSFunctionSpec TransformStream::methods[] = {JS_FS_END};
 const JSPropertySpec TransformStream::properties[] = {
     JS_PSG("readable", readable_get, JSPROP_ENUMERATE),
     JS_PSG("writable", writable_get, JSPROP_ENUMERATE), JS_PS_END};
-const JSFunctionSpec TransformStream::static_methods[] = {JS_FS_END};
-const JSPropertySpec TransformStream::static_properties[] = {JS_PS_END};
+
 /**
  * https://streams.spec.whatwg.org/#ts-constructor
  */

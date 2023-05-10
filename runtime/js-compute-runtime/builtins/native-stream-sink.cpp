@@ -126,9 +126,6 @@ const JSFunctionSpec NativeStreamSink::methods[] = {
 
 const JSPropertySpec NativeStreamSink::properties[] = {JS_PS_END};
 
-const JSFunctionSpec NativeStreamSink::static_methods[] = {JS_FS_END};
-const JSPropertySpec NativeStreamSink::static_properties[] = {JS_PS_END};
-
 JSObject *NativeStreamSink::create(JSContext *cx, JS::HandleObject owner,
                                    JS::HandleValue startPromise,
                                    WriteAlgorithmImplementation *write,

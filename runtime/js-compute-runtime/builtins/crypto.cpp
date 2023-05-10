@@ -186,8 +186,6 @@ const JSFunctionSpec Crypto::methods[] = {
 const JSPropertySpec Crypto::properties[] = {
     JS_PSG("subtle", subtle_get, JSPROP_ENUMERATE),
     JS_STRING_SYM_PS(toStringTag, "Crypto", JSPROP_READONLY), JS_PS_END};
-const JSFunctionSpec Crypto::static_methods[] = {JS_FS_END};
-const JSPropertySpec Crypto::static_properties[] = {JS_PS_END};
 
 bool Crypto::constructor(JSContext *cx, unsigned argc, JS::Value *vp) {
   JS_ReportErrorNumberASCII(cx, GetErrorMessage, nullptr, JSMSG_ILLEGAL_CTOR);

@@ -217,9 +217,6 @@ const JSPropertySpec DecompressionStream::properties[] = {
     JS_PS_END,
 };
 
-const JSFunctionSpec DecompressionStream::static_methods[] = {JS_FS_END};
-const JSPropertySpec DecompressionStream::static_properties[] = {JS_PS_END};
-
 namespace {
 
 // Steps 2-6 of `new DecompressionStream()`.

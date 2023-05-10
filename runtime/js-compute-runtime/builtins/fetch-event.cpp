@@ -381,9 +381,6 @@ const JSPropertySpec FetchEvent::properties[] = {
     JS_PS_END,
 };
 
-const JSFunctionSpec FetchEvent::static_methods[] = {JS_FS_END};
-const JSPropertySpec FetchEvent::static_properties[] = {JS_PS_END};
-
 JSObject *FetchEvent::create(JSContext *cx) {
   JS::RootedObject self(cx, JS_NewObjectWithGivenProto(cx, &class_, proto_obj));
   if (!self)

@@ -101,8 +101,6 @@ const JSFunctionSpec URLSearchParamsIterator::methods[] = {
 const JSPropertySpec URLSearchParamsIterator::properties[] = {
     JS_PS_END,
 };
-const JSFunctionSpec URLSearchParamsIterator::static_methods[] = {JS_FS_END};
-const JSPropertySpec URLSearchParamsIterator::static_properties[] = {JS_PS_END};
 
 // This constructor will be deleted from the class prototype right after class
 // initialization.
@@ -168,8 +166,6 @@ const JSFunctionSpec URLSearchParams::methods[] = {
 const JSPropertySpec URLSearchParams::properties[] = {
     JS_PS_END,
 };
-const JSFunctionSpec URLSearchParams::static_methods[] = {JS_FS_END};
-const JSPropertySpec URLSearchParams::static_properties[] = {JS_PS_END};
 
 jsurl::JSUrlSearchParams *URLSearchParams::get_params(JSObject *self) {
   return static_cast<jsurl::JSUrlSearchParams *>(
@@ -541,8 +537,6 @@ const JSPropertySpec URL::properties[] = {
     JS_PSGS("username", URL::username_get, URL::username_set, JSPROP_ENUMERATE),
     JS_PS_END,
 };
-const JSFunctionSpec URL::static_methods[] = {JS_FS_END};
-const JSPropertySpec URL::static_properties[] = {JS_PS_END};
 
 jsurl::SpecString URL::origin(JSContext *cx, JS::HandleObject self) {
   auto *url = static_cast<const jsurl::JSUrl *>(JS::GetReservedSlot(self, Slots::Url).toPrivate());

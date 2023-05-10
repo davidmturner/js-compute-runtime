@@ -32,9 +32,6 @@ const JSFunctionSpec Env::methods[] = {JS_FN("get", env_get, 1, JSPROP_ENUMERATE
 
 const JSPropertySpec Env::properties[] = {JS_PS_END};
 
-const JSFunctionSpec Env::static_methods[] = {JS_FS_END};
-const JSPropertySpec Env::static_properties[] = {JS_PS_END};
-
 JSObject *Env::create(JSContext *cx) {
   JS::RootedObject env(cx, JS_NewPlainObject(cx));
   if (!env || !JS_DefineFunctions(cx, env, methods))

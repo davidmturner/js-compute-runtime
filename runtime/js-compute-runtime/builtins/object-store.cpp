@@ -89,8 +89,6 @@ const JSPropertySpec ObjectStoreEntry::properties[] = {
     JS_PSG("bodyUsed", bodyUsed_get, JSPROP_ENUMERATE),
     JS_PS_END,
 };
-const JSFunctionSpec ObjectStoreEntry::static_methods[] = {JS_FS_END};
-const JSPropertySpec ObjectStoreEntry::static_properties[] = {JS_PS_END};
 
 bool ObjectStoreEntry::constructor(JSContext *cx, unsigned argc, JS::Value *vp) {
   JS_ReportErrorUTF8(cx, "ObjectStoreEntry can't be instantiated directly");
@@ -395,8 +393,6 @@ const JSFunctionSpec ObjectStore::methods[] = {
 const JSPropertySpec ObjectStore::properties[] = {
     JS_PS_END,
 };
-const JSFunctionSpec ObjectStore::static_methods[] = {JS_FS_END};
-const JSPropertySpec ObjectStore::static_properties[] = {JS_PS_END};
 
 bool ObjectStore::constructor(JSContext *cx, unsigned argc, JS::Value *vp) {
   REQUEST_HANDLER_ONLY("The ObjectStore builtin");

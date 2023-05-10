@@ -63,8 +63,6 @@ const JSPropertySpec WorkerLocation::properties[] = {
     JS_PSG("hash", hash_get, JSPROP_ENUMERATE),
     JS_STRING_SYM_PS(toStringTag, "Location", JSPROP_READONLY),
     JS_PS_END};
-const JSFunctionSpec WorkerLocation::static_methods[] = {JS_FS_END};
-const JSPropertySpec WorkerLocation::static_properties[] = {JS_PS_END};
 
 bool WorkerLocation::constructor(JSContext *cx, unsigned argc, JS::Value *vp) {
   JS_ReportErrorLatin1(cx, "Illegal constructor WorkerLocation");

@@ -318,9 +318,6 @@ const JSPropertySpec CacheOverride::properties[] = {
     JS_STRING_SYM_PS(toStringTag, "CacheOverride", JSPROP_READONLY),
     JS_PS_END};
 
-const JSFunctionSpec CacheOverride::static_methods[] = {JS_FS_END};
-const JSPropertySpec CacheOverride::static_properties[] = {JS_PS_END};
-
 bool CacheOverride::constructor(JSContext *cx, unsigned argc, JS::Value *vp) {
   CTOR_HEADER("CacheOverride", 1);
 

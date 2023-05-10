@@ -863,7 +863,7 @@ JSString *parse_and_validate_name(JSContext *cx, JS::HandleValue name_val) {
 bool Backend::exists(JSContext *cx, unsigned argc, JS::Value *vp) {
   JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
   JS::RootedObject self(cx, &args.thisv().toObject());
-  if (!args.requireAtLeast(cx, "Backend exists", 1)) {
+  if (!args.requireAtLeast(cx, "Backend.exists", 1)) {
     return false;
   }
 
@@ -884,12 +884,59 @@ bool Backend::exists(JSContext *cx, unsigned argc, JS::Value *vp) {
   return true;
 }
 
+bool Backend::fromName(JSContext *cx, unsigned argc, JS::Value *vp) {
+  JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
+  JS::RootedObject self(cx, &args.thisv().toObject());
+  if (!args.requireAtLeast(cx, "Backend.fromName", 1)) {
+    return false;
+  }
+
+  JS::RootedString name(cx, parse_and_validate_name(cx, args.get(0)));
+  if (!name) {
+    return false;
+  }
+  fastly_world_string_t name_str;
+  JS::UniqueChars nameChars = encode(cx, name, &name_str.len);
+  name_str.ptr = nameChars.get();
+  fastly_error_t err;
+  bool exists;
+  if (!fastly_backend_exists(&name_str, &exists, &err)) {
+    HANDLE_ERROR(cx, err);
+    return false;
+  }
+
+  if (!exists) {
+    JS_ReportErrorNumberUTF8(cx, GetErrorMessage, nullptr,
+                             JSMSG_BACKEND_FROMNAME_BACKEND_DOES_NOT_EXIST, name_str.ptr);
+    return false;
+  }
+
+  auto backendInstance = JS_NewObjectWithGivenProto(cx, &Backend::class_, Backend::proto_obj);
+  if (!backendInstance) {
+    return false;
+  }
+  JS::RootedValue backendVal(cx, JS::ObjectValue(*backendInstance));
+  JS::RootedObject backend(cx, backendInstance);
+  if (!backend) {
+    return false;
+  }
+
+  JS::RootedValue nameVal(cx, JS::StringValue(name));
+  if (!Backend::set_name(cx, backend, nameVal)) {
+    return false;
+  }
+
+  args.rval().setObject(*backend);
+  return true;
+}
+
 const JSFunctionSpec Backend::methods[] = {JS_FN("toString", toString, 0, JSPROP_ENUMERATE),
                                            JS_FN("toName", toString, 0, JSPROP_ENUMERATE),
                                            JS_FS_END};
 
 const JSPropertySpec Backend::properties[] = {JS_PS_END};
 const JSFunctionSpec Backend::static_methods[] = {JS_FN("exists", exists, 1, JSPROP_ENUMERATE),
+                                                  JS_FN("fromName", fromName, 1, JSPROP_ENUMERATE),
                                                   JS_FS_END};
 const JSPropertySpec Backend::static_properties[] = {JS_PS_END};
 

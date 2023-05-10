@@ -167,8 +167,6 @@ const JSFunctionSpec NativeStreamSource::methods[] = {JS_FN("start", start, 1, 0
                                                       JS_FN("cancel", cancel, 1, 0), JS_FS_END};
 
 const JSPropertySpec NativeStreamSource::properties[] = {JS_PS_END};
-const JSFunctionSpec NativeStreamSource::static_methods[] = {JS_FS_END};
-const JSPropertySpec NativeStreamSource::static_properties[] = {JS_PS_END};
 
 JSObject *NativeStreamSource::create(JSContext *cx, JS::HandleObject owner,
                                      JS::HandleValue startPromise,
