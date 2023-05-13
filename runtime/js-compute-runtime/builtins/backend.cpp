@@ -757,10 +757,8 @@ JS::Result<mozilla::Ok> Backend::register_dynamic_backend(JSContext *cx, JS::Han
     backend_config.use_ssl.val = useSslSlot.toBoolean();
   }
 
-  auto dontPoolSlot = JS::GetReservedSlot(backend, Backend::Slots::DontPool);
-  if ((backend_config.use_ssl.is_some = !dontPoolSlot.isNullOrUndefined())) {
-    backend_config.use_ssl.val = dontPoolSlot.toBoolean();
-  }
+  backend_config.dont_pool.is_some = true;
+  backend_config.dont_pool.val = true;
 
   auto tlsMinVersion = JS::GetReservedSlot(backend, Backend::Slots::TlsMinVersion);
   if ((backend_config.ssl_min_version.is_some = !tlsMinVersion.isNullOrUndefined())) {
