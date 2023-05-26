@@ -10,4 +10,4 @@ inputs=(
 )
 
 cat "${inputs[@]}" > "${script_dir}/wpt-test-runner.js"
-node "${script_dir}/../../js-compute-runtime-cli.js" "${script_dir}/wpt-test-runner.js" wpt-runtime.wasm
+"${script_dir}/../../js-compute-runtime-cli.js" --enable-weval "${script_dir}/wpt-test-runner.js" wpt-runtime.wasm
