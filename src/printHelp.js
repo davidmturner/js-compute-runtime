@@ -12,6 +12,7 @@ FLAGS:
 
 OPTIONS:
     --engine-wasm <engine-wasm>                             The JS engine Wasm file path
+    --enable-weval                                          Enable experimental weval mode which will partially evaluate the SpiderMonkey JS interpreter together with JS scripts, ahead-of-time, to produce compiled code
     --enable-experimental-high-resolution-time-methods      Enable experimental high-resolution fastly.now() method
 
 ARGS:
