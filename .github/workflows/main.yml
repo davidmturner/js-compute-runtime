@@ -85,7 +85,7 @@ jobs:
           mv "$ORIGINAL_WASM_OPT_PATH" "$ORIGINAL_WASM_OPT_PATH.bak"
         fi
         bash ./build-engine.sh ${{ matrix.profile }}
-        if [[ -v ORIGINAL_WASM_OPT_PATH ]]; then
+        if [[ -z ORIGINAL_WASM_OPT_PATH ]]; then
           mv "$ORIGINAL_WASM_OPT_PATH.bak" "$ORIGINAL_WASM_OPT_PATH"
         fi
 
