@@ -18,7 +18,7 @@
 #
 # > mkdir my_test
 # > cd my_test
-# > DEBUG=true ../tests/wpt-harness/run-wpt.sh
+# > DEBUG=true WEVAL=true ../tests/wpt-harness/run-wpt.sh
 #
 # For this to work, you'll need to have run the following command in advance:
 #
