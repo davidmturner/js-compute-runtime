@@ -118,7 +118,15 @@ jobs:
         if: ${{ steps.sm-cache.outputs.cache-hit != 'true' }}
         run: |
           cd runtime/spidermonkey/
+          export ORIGINAL_WASM_OPT_PATH="$(which wasm-opt)"
+          if which wasm-opt ; then
+            export ORIGINAL_WASM_OPT_PATH="$(which wasm-opt)"
+            mv "$ORIGINAL_WASM_OPT_PATH" "$ORIGINAL_WASM_OPT_PATH.bak"
+          fi
           bash ./build-engine.sh release
+          if [[ -v ORIGINAL_WASM_OPT_PATH ]]; then
+            mv "$ORIGINAL_WASM_OPT_PATH.bak" "$ORIGINAL_WASM_OPT_PATH"
+          fi
 
       - name: "Install wasi-sdk-19 (linux)"
         run: |
