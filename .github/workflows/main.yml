@@ -119,8 +119,11 @@ jobs:
       with:
         name: engine-${{ matrix.profile }}
         path: |
-          js-compute-runtime.wasm
+          js-compute-runtime-component-normal.wasm
+          js-compute-runtime-component-weval.wasm
           js-compute-runtime-component.wasm
+          js-compute-runtime-normal.wasm
+          js-compute-runtime-weval.wasm
 
   ensure_cargo_installs:
     name: Ensure that all required "cargo install" commands are run, or we have a cache hit
